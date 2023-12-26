@@ -10,7 +10,7 @@ public class InterfaceNavigationUtil {
         sleep(500);
 
         // Switch to 'Online' tab
-        for (int i = 0; i < (isStoryMode ? 5 : 1); i++) {
+        for (int i = 0; i < (isStoryMode ? 6 : 1); i++) {
             keyPress("RIGHT", 25L);
             sleep(75L);
         }

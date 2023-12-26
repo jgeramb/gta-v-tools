@@ -1,5 +1,6 @@
 package dev.justix.gtavtools.tools.mission;
 
+import dev.justix.gtavtools.config.ApplicationConfig;
 import dev.justix.gtavtools.gui.components.settings.BooleanSetting;
 import dev.justix.gtavtools.logging.Level;
 import dev.justix.gtavtools.logging.Logger;
@@ -8,7 +9,6 @@ import dev.justix.gtavtools.tools.Tool;
 import dev.justix.gtavtools.util.ImageUtil;
 import dev.justix.gtavtools.util.InterfaceNavigationUtil;
 import dev.justix.gtavtools.util.OCRUtil;
-import dev.justix.gtavtools.util.SystemUtil;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.RescaleOp;
@@ -16,9 +16,12 @@ import java.io.IOException;
 import java.util.Locale;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static dev.justix.gtavtools.util.SystemUtil.*;
+
 public class ReplayGlitch extends Tool {
 
     private static final float REQUIRED_MATCH_PERCENTAGE = 0.915f;
+
     private final BufferedImage requiredPosition;
     private boolean waitingForPosition, instantGlitch, cancel;
 
@@ -38,20 +41,21 @@ public class ReplayGlitch extends Tool {
         this.requiredPosition = requiredPositionImage;
         this.waitingForPosition = false;
         this.instantGlitch = false;
-        this.cancel = false;
     }
 
     @Override
     public void execute() {
-        if (waitingForPosition) {
-            logger.log(Level.INFO, "Skipping waiting for position...");
+        this.cancel = false;
 
-            instantGlitch = true;
+        if (this.waitingForPosition) {
+            this.logger.log(Level.INFO, "Skipping waiting for position...");
+
+            this.instantGlitch = true;
         } else {
-            instantGlitch = false;
-            waitingForPosition = true;
+            this.instantGlitch = false;
+            this.waitingForPosition = true;
 
-            logger.log(Level.INFO, "Waiting for mission completion...");
+            this.logger.log(Level.INFO, "Waiting for mission completion...");
 
             try {
                 final boolean matchText = booleanValue("Match Text", false);
@@ -60,12 +64,12 @@ public class ReplayGlitch extends Tool {
                 Thread imageThread = null;
 
                 if (!(matchText)) {
-                    if (requiredPosition == null)
+                    if (this.requiredPosition == null)
                         return;
 
                     imageThread = new Thread(() -> {
-                        while (waitingForPosition) {
-                            currentScreenPart.set(comparableImage(SystemUtil.screenshot(1176, 432, 220, 464)));
+                        while (this.waitingForPosition) {
+                            currentScreenPart.set(comparableImage(screenshot(1176, 432, 220, 464)));
 
                             synchronized (imageLock) {
                                 imageLock.notify();
@@ -78,13 +82,13 @@ public class ReplayGlitch extends Tool {
                 int frames = 0;
                 long secondStart = System.currentTimeMillis();
 
-                while (!(instantGlitch || cancel)) {
+                while (!(this.instantGlitch || this.cancel)) {
                     boolean matched;
                     double matchPercentage = 0;
 
                     if (matchText) {
-                        matched = OCRUtil.ocr(SystemUtil.screenshot(0, 218, 617, 145)).equals("RAUBÜBERFALL")
-                                || OCRUtil.ocr(SystemUtil.screenshot(132, 400, 160, 50)).equals("MISSION");
+                        matched = OCRUtil.ocr(screenshot(0, 218, 617, 145)).equals("RAUBÜBERFALL")
+                                || OCRUtil.ocr(screenshot(132, 400, 160, 50)).equals("MISSION");
                     } else {
                         synchronized (imageLock) {
                             imageLock.wait();
@@ -93,15 +97,15 @@ public class ReplayGlitch extends Tool {
                         BufferedImage screenPart = currentScreenPart.get();
 
                         // Compare images
-                        matchPercentage = ImageUtil.getMaxMatchPercentage(requiredPosition, screenPart, REQUIRED_MATCH_PERCENTAGE, 3, 3);
+                        matchPercentage = ImageUtil.getMaxMatchPercentage(this.requiredPosition, screenPart, REQUIRED_MATCH_PERCENTAGE, 3, 3);
                         matched = matchPercentage >= REQUIRED_MATCH_PERCENTAGE;
 
                         currentScreenPart.set(null);
 
-                        if (SystemUtil.DEBUG && (matchPercentage >= (REQUIRED_MATCH_PERCENTAGE - 0.025)))
+                        if (DEBUG && (matchPercentage >= (REQUIRED_MATCH_PERCENTAGE - 0.025)))
                             System.out.printf(Locale.US, "%d%% position similarity\n", Math.round(matchPercentage * 100));
 
-                        if (SystemUtil.DEBUG) {
+                        if (DEBUG) {
                             frames++;
 
                             if ((System.currentTimeMillis() - secondStart) >= 1000L) {
@@ -113,86 +117,87 @@ public class ReplayGlitch extends Tool {
                     }
 
                     if (matched) {
-                        logger.log(Level.INFO, "Mission completed (" + (matchText ? "text" : ("position " + (Math.round(matchPercentage * 100 * 10d) / 10d) + "%")) + " matched), performing replay glitch...");
+                        this.logger.log(Level.INFO, "Mission completed (" + (matchText ? "text" : ("position " + (Math.round(matchPercentage * 100 * 10d) / 10d) + "%")) + " matched), performing replay glitch...");
 
-                        if (!matchText)
-                            SystemUtil.sleep(booleanValue("Elite", true) ? 760 : 260);
+                        if (!matchText && !DEBUG)
+                            sleep(booleanValue("Elite", true) ? 375 : 255);
                         break;
                     }
                 }
 
-                if (cancel)
+                if (this.cancel)
                     return;
 
                 if (imageThread != null)
                     imageThread.interrupt();
 
-                waitingForPosition = false;
+                this.waitingForPosition = false;
 
-                if (!(SystemUtil.DEBUG)) {
+                if (!(DEBUG)) {
                     // Disable network
-                    Runtime.getRuntime().exec(new String[]{
-                            "C:\\Windows\\System32\\netsh.exe",
+                    Runtime.getRuntime().exec(new String[] {
+                            "netsh",
                             "interface",
                             "set",
                             "interface",
-                            "Intel - 1 Gbit",
+                            String.format("\"%s\"", ApplicationConfig.CONFIG.get("networkInterfaceName")),
                             "disable"
                     }).waitFor();
 
-                    SystemUtil.sleep(16750L);
-                    SystemUtil.keyPress("ENTER", 50L);
+                    sleep(16750L);
+                    keyPress("ENTER", 50L);
 
                     // Reconnect network
-                    SystemUtil.sleep(5000L);
+                    sleep(5000L);
 
                     Runtime.getRuntime().exec(new String[]{
-                            "C:\\Windows\\System32\\netsh.exe",
+                            "netsh",
                             "interface",
                             "set",
                             "interface",
-                            "Intel - 1 Gbit",
+                            String.format("\"%s\"", ApplicationConfig.CONFIG.get("networkInterfaceName")),
                             "enable"
                     }).waitFor();
 
-                    SystemUtil.sleep(15000L);
+                    sleep(15000L);
 
                     // Open Social Club
-                    SystemUtil.keyPress("HOME", 50L);
-                    SystemUtil.sleep(1250L);
+                    keyPress("HOME", 50L);
+                    sleep(1250L);
 
                     // Reconnect and close pop-up
-                    SystemUtil.robot().mouseMove(1210, 334);
-                    SystemUtil.sleep(150L);
-                    SystemUtil.mouseClick("LEFT", 100L);
-                    SystemUtil.sleep(5000L);
+                    robot().mouseMove(1210, 334);
+                    sleep(150L);
+                    mouseClick("LEFT", 100L);
+
+                    sleep(4000L);
 
                     // Close pop-up
-                    SystemUtil.keyPress("ESCAPE", 50L);
-                    SystemUtil.sleep(3500L);
+                    keyPress("ESCAPE", 50L);
+                    sleep(3500L);
 
                     InterfaceNavigationUtil.openPlayOnlineOptions(true);
 
                     // Select 'Invite-only session'
-                    SystemUtil.keyPress("DOWN", 50L);
-                    SystemUtil.sleep(150L);
-                    SystemUtil.keyPress("ENTER", 50L);
-                    SystemUtil.sleep(750L);
+                    keyPress("DOWN", 50L);
+                    sleep(150L);
+                    keyPress("ENTER", 50L);
+                    sleep(750L);
 
                     // Accept warning
-                    SystemUtil.keyPress("ENTER", 50L);
+                    keyPress("ENTER", 50L);
 
-                    logger.log(Level.INFO, "Glitch completed, connecting back to GTA Online");
+                    this.logger.log(Level.INFO, "Glitch completed, connecting back to GTA Online");
                 }
             } catch (Exception ex) {
-                logger.log(Level.SEVERE, "An error occurred while executing tool: " + ex.getMessage());
+                this.logger.log(Level.SEVERE, "An error occurred while executing tool: " + ex.getMessage());
             }
         }
     }
 
     @Override
     public void forceStop() {
-        cancel = true;
+        this.cancel = true;
     }
 
     private BufferedImage comparableImage(BufferedImage image) {

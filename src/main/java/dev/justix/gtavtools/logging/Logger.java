@@ -17,10 +17,13 @@ public class Logger {
     }
 
     public void log(Level level, String message) {
-        writeToStream(((System.out == out) && level.equals(Level.SEVERE)) ? System.err : out, "[" + LocalDateTime.now().format(DATE_TIME_FORMATTER) + " " + level.name() + ": " + Thread.currentThread().getName() + "] " + message + System.lineSeparator());
+        writeToStream(
+                ((System.out == this.out) && level.equals(Level.SEVERE)) ? System.err : this.out,
+                "[" + LocalDateTime.now().format(DATE_TIME_FORMATTER) + " " + level.name() + ": " + Thread.currentThread().getName() + "] " + message + System.lineSeparator()
+        );
     }
 
-    public void writeToStream(OutputStream outputStream, String message) {
+    private void writeToStream(OutputStream outputStream, String message) {
         try {
             outputStream.write(message.getBytes(StandardCharsets.UTF_8));
         } catch (IOException ex) {

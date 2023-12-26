@@ -74,7 +74,7 @@ public class StartCayoPerico extends Tool {
             SystemUtil.sleep(3_000);
 
             SystemUtil.keyPress("ENTER", 15);
-            SystemUtil.sleep(9_000L);
+            SystemUtil.sleep(9_500L);
 
             // Set mission settings
 
