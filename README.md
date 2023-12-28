@@ -1,7 +1,7 @@
 # GTA V Tools
 
 ## Requirements
-- JDK 21 or higher
+- JDK 19
 - Run configurations & run files must be run as administrator
 - Npcap must be installed in WinPcap Compatible Mode
 - GTA V must be running in windowed borderless mode at full screen resolution
