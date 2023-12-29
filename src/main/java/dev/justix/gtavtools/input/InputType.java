@@ -6,8 +6,6 @@ public enum InputType {
     KEY_UP,
     MOUSE_DOWN,
     MOUSE_UP,
-    MOVE_START,
-    MOVE_END,
     WAIT
 
 }

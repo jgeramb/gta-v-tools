@@ -23,9 +23,9 @@ public class SignalBoxHack extends Tool {
         BufferedImage factor1Image = null, factor2Image = null, factor10Image = null;
 
         try {
-            factor1Image = comparableImage(ImageUtil.fromResource("/mission-images/hack-factor-1.png"));
-            factor2Image = comparableImage(ImageUtil.fromResource("/mission-images/hack-factor-2.png"));
-            factor10Image = comparableImage(ImageUtil.fromResource("/mission-images/hack-factor-10.png"));
+            factor1Image = comparableImage(ImageUtil.fromResource("/1920x1200/mission-images/hack-factor-1.png"));
+            factor2Image = comparableImage(ImageUtil.fromResource("/1920x1200/mission-images/hack-factor-2.png"));
+            factor10Image = comparableImage(ImageUtil.fromResource("/1920x1200/mission-images/hack-factor-10.png"));
         } catch (IOException ignore) {
         }
 

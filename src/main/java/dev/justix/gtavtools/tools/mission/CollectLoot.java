@@ -20,36 +20,33 @@ public class CollectLoot extends Tool {
 
     @Override
     public void execute() {
-        if (collecting)
+        if (this.collecting)
             logger.log(Level.WARNING, "Loot collection interrupted");
         else {
             logger.log(Level.INFO, "Collecting loot...");
-
-            thread = new Thread(() -> {
+            this.thread = new Thread(() -> {
                 Thread.currentThread().setName("Loot collection");
 
                 for (int i = 0; i < 34; i++) {
-                    if (!(collecting)) return;
+                    if (!this.collecting) return;
 
                     SystemUtil.mouseClick("LEFT", 25);
                     SystemUtil.sleep(250);
                 }
 
                 logger.log(Level.INFO, "Collected loot successfully");
-
-                collecting = false;
+                this.collecting = false;
             });
-            thread.start();
+            this.thread.start();
         }
 
-        collecting = !(collecting);
+        this.collecting = !this.collecting;
     }
 
     @Override
     public void forceStop() {
-        collecting = false;
-
-        thread.interrupt();
+        this.collecting = false;
+        this.thread.interrupt();
     }
 
 }

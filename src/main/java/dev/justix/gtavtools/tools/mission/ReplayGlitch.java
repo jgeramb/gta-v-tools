@@ -29,7 +29,11 @@ public class ReplayGlitch extends Tool {
         super(logger, Category.MISSION, "Replay Glitch");
 
         addSetting(new BooleanSetting(this, "Elite", true));
-        addSetting(new BooleanSetting(this, "Match Text", false));
+        addSetting(new BooleanSetting(this, "Cayo Perico", true));
+
+        this.relativeData.addRect("1920x1200", "cayo_perico_glitch", 1176, 432, 220, 464);
+        this.relativeData.addRect("1920x1200", "completed_text_1", 0, 218, 617, 145);
+        this.relativeData.addRect("1920x1200", "completed_text_2", 132, 400, 160, 50);
 
         BufferedImage requiredPositionImage = null;
 
@@ -48,28 +52,28 @@ public class ReplayGlitch extends Tool {
         this.cancel = false;
 
         if (this.waitingForPosition) {
-            this.logger.log(Level.INFO, "Skipping waiting for position...");
+            logger.log(Level.INFO, "Skipping waiting for position...");
 
             this.instantGlitch = true;
         } else {
             this.instantGlitch = false;
             this.waitingForPosition = true;
 
-            this.logger.log(Level.INFO, "Waiting for mission completion...");
+            logger.log(Level.INFO, "Waiting for mission completion...");
 
             try {
-                final boolean matchText = booleanValue("Match Text", false);
+                final boolean cayoPerico = booleanValue("Cayo Perico", false);
                 final AtomicReference<BufferedImage> currentScreenPart = new AtomicReference<>();
                 final Object imageLock = new Object();
                 Thread imageThread = null;
 
-                if (!(matchText)) {
+                if (cayoPerico) {
                     if (this.requiredPosition == null)
                         return;
 
                     imageThread = new Thread(() -> {
                         while (this.waitingForPosition) {
-                            currentScreenPart.set(comparableImage(screenshot(1176, 432, 220, 464)));
+                            currentScreenPart.set(comparableImage(screenshot(this.relativeData.getRect("cayo_perico_glitch"))));
 
                             synchronized (imageLock) {
                                 imageLock.notify();
@@ -86,9 +90,9 @@ public class ReplayGlitch extends Tool {
                     boolean matched;
                     double matchPercentage = 0;
 
-                    if (matchText) {
-                        matched = OCRUtil.ocr(screenshot(0, 218, 617, 145)).equals("RAUBÜBERFALL")
-                                || OCRUtil.ocr(screenshot(132, 400, 160, 50)).equals("MISSION");
+                    if (!cayoPerico) {
+                        matched = OCRUtil.ocr(screenshot(this.relativeData.getRect("completed_text_1"))).equals("RAUBÜBERFALL")
+                                || OCRUtil.ocr(screenshot(this.relativeData.getRect("completed_text_2"))).equals("MISSION");
                     } else {
                         synchronized (imageLock) {
                             imageLock.wait();
@@ -117,9 +121,9 @@ public class ReplayGlitch extends Tool {
                     }
 
                     if (matched) {
-                        this.logger.log(Level.INFO, "Mission completed (" + (matchText ? "text" : ("position " + (Math.round(matchPercentage * 100 * 10d) / 10d) + "%")) + " matched), performing replay glitch...");
+                        logger.log(Level.INFO, "Mission completed (" + (cayoPerico ? ("position " + (Math.round(matchPercentage * 100 * 10d) / 10d) + "%") : "text") + " matched), performing replay glitch...");
 
-                        if (!matchText && !DEBUG)
+                        if (cayoPerico && !DEBUG)
                             sleep(booleanValue("Elite", true) ? 375 : 255);
                         break;
                     }
@@ -133,7 +137,7 @@ public class ReplayGlitch extends Tool {
 
                 this.waitingForPosition = false;
 
-                if (!(DEBUG)) {
+                if (!DEBUG) {
                     // Disable network
                     Runtime.getRuntime().exec(new String[] {
                             "netsh",
@@ -187,10 +191,10 @@ public class ReplayGlitch extends Tool {
                     // Accept warning
                     keyPress("ENTER", 50L);
 
-                    this.logger.log(Level.INFO, "Glitch completed, connecting back to GTA Online");
+                    logger.log(Level.INFO, "Glitch completed, connecting back to GTA Online");
                 }
             } catch (Exception ex) {
-                this.logger.log(Level.SEVERE, "An error occurred while executing tool: " + ex.getMessage());
+                logger.log(Level.SEVERE, "An error occurred while executing tool: " + ex.getMessage());
             }
         }
     }

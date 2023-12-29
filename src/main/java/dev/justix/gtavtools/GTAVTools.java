@@ -6,11 +6,9 @@ import com.github.kwhat.jnativehook.keyboard.NativeKeyEvent;
 import com.github.kwhat.jnativehook.keyboard.NativeKeyListener;
 import com.github.kwhat.jnativehook.mouse.NativeMouseEvent;
 import com.github.kwhat.jnativehook.mouse.NativeMouseInputListener;
-import com.github.kwhat.jnativehook.mouse.NativeMouseMotionListener;
 import dev.justix.gtavtools.gui.GUI;
 import dev.justix.gtavtools.input.Input;
 import dev.justix.gtavtools.input.InputType;
-import dev.justix.gtavtools.input.MotionInput;
 import dev.justix.gtavtools.logging.Level;
 import dev.justix.gtavtools.logging.Logger;
 import dev.justix.gtavtools.tools.ToolManager;
@@ -31,16 +29,14 @@ public class GTAVTools {
     private static GUI gui;
     @Getter
     private static ToolManager toolManager;
-    private static final AtomicBoolean mouseMoving = new AtomicBoolean(false), ctrlPressed = new AtomicBoolean(false);
-    private static long lastActionTime, lastMoveTime;
-    private static int startX, startY, currentX, currentY;
+    private static final AtomicBoolean ctrlPressed = new AtomicBoolean(false);
+    private static long lastActionTime;
 
     public static void main(String[] args) throws InterruptedException {
         final boolean recordInputs = (args.length == 0) || !(args[0].equalsIgnoreCase("--no-record"));
         final Toolkit toolkit = Toolkit.getDefaultToolkit();
-        final Object mouseMotionLock = new Object();
         final Dimension screenBounds = toolkit.getScreenSize();
-        final int centerX = startX = currentX = screenBounds.width / 2, centerY = startY = currentY = screenBounds.height / 2;
+        final int centerX = screenBounds.width / 2, centerY = screenBounds.height / 2;
 
         Thread.currentThread().setName("Application");
 
@@ -71,12 +67,9 @@ public class GTAVTools {
             return;
         }
 
-        final AtomicBoolean running = new AtomicBoolean(true);
-
         // Register Native Hook listeners
 
         lastActionTime = System.currentTimeMillis();
-        lastMoveTime = System.currentTimeMillis();
 
         GlobalScreen.addNativeKeyListener(new NativeKeyListener() {
             @Override
@@ -87,8 +80,6 @@ public class GTAVTools {
                 String keyName = SystemUtil.getKeyName(rawKeyCode);
 
                 if (ctrlPressed.get() && keyName.equals("SCROLL_LOCK")) {
-                    running.set(false);
-
                     Thread.currentThread().setName("Application");
 
                     logger.log(Level.INFO, "Shutting down application...");
@@ -135,22 +126,6 @@ public class GTAVTools {
 
                                     if (tmpInput.getType().equals(InputType.MOUSE_UP) && (button == tmpInput.getValue())) {
                                         code.append("mouseClick(\"").append(SystemUtil.getButtonName(button)).append("\", ").append(time).append("L);").append(System.lineSeparator());
-                                        break;
-                                    } else if (tmpInput.getType().equals(InputType.WAIT))
-                                        time += tmpInput.getValue();
-                                }
-
-                                lastDuration = time;
-                            } else if (input.getType().equals(InputType.MOVE_START)) {
-                                MotionInput motionInput = (MotionInput) input;
-                                long time = 0;
-
-                                for (int j = i + 1; j < inputs.size(); j++) {
-                                    Input tmpInput = inputs.get(j);
-
-                                    if (tmpInput.getType().equals(InputType.MOVE_END)) {
-                                        MotionInput tmpMotionInput = (MotionInput) tmpInput;
-                                        code.append("mouseMove(").append(motionInput.getX()).append(", ").append(motionInput.getY()).append(", ").append(tmpMotionInput.getX()).append(", ").append(tmpMotionInput.getY()).append(", ").append(time).append("L);").append(System.lineSeparator());
                                         break;
                                     } else if (tmpInput.getType().equals(InputType.WAIT))
                                         time += tmpInput.getValue();
@@ -250,60 +225,6 @@ public class GTAVTools {
                     lastActionTime = System.currentTimeMillis();
                 }
             });
-
-            GlobalScreen.addNativeMouseMotionListener(new NativeMouseMotionListener() {
-                @Override
-                public void nativeMouseMoved(NativeMouseEvent nativeEvent) {
-                    synchronized (mouseMotionLock) {
-                        long currentTime = System.currentTimeMillis();
-                        int x = Math.max(nativeEvent.getX(), 0), y = Math.max(nativeEvent.getY(), 0);
-
-                        if (mouseMoving.get()) {
-                            currentX = x;
-                            currentY = y;
-                        } else {
-                            long timeDiff = currentTime - lastActionTime;
-
-                            if (timeDiff > 0)
-                                inputs.add(new Input(InputType.WAIT, timeDiff));
-
-                            lastActionTime = currentTime;
-                            startX = x;
-                            startY = y;
-                            mouseMoving.set(true);
-
-                            inputs.add(new MotionInput(InputType.MOVE_START, startX, startY));
-                        }
-
-                        lastMoveTime = currentTime;
-                    }
-                }
-            });
-
-            new Thread(() -> {
-                while (running.get()) {
-                    long currentTime = System.currentTimeMillis(), timeDiff = currentTime - lastActionTime;
-
-                    synchronized (mouseMotionLock) {
-                        if (
-                                mouseMoving.get()
-                                        && ((currentTime - lastMoveTime) > 10)
-                                        && (
-                                        (Math.abs(currentX - startX) > 0)
-                                                || (Math.abs(currentY - startY) > 0)
-                                )
-                        ) {
-                            if (timeDiff > 0)
-                                inputs.add(new Input(InputType.WAIT, timeDiff));
-
-                            inputs.add(new MotionInput(InputType.MOVE_END, currentX, currentY));
-
-                            lastActionTime = currentTime;
-                            mouseMoving.set((false));
-                        }
-                    }
-                }
-            }).start();
         }
 
         logger.log(Level.INFO, "Initialization complete, waiting for inputs...");

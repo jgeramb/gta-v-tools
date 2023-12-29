@@ -2,7 +2,6 @@ package dev.justix.gtavtools.util;
 
 import net.sourceforge.tess4j.Tesseract;
 import net.sourceforge.tess4j.TesseractException;
-import net.sourceforge.tess4j.util.LoadLibs;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -18,9 +17,8 @@ public class OCRUtil {
         try {
             tesseract.setDatapath(new File(OCRUtil.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParentFile().getPath() + "\\classes\\tessdata");
             tesseract.setLanguage("deu");
-        } catch (URISyntaxException e) {
-            tesseract.setDatapath(LoadLibs.extractTessResources("tessdata").getPath());
-            tesseract.setLanguage("eng");
+        } catch (URISyntaxException ex) {
+            System.err.println("Could not find Tesseract training data");
         }
     }
 

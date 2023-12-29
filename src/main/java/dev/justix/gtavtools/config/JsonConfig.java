@@ -18,9 +18,9 @@ public class JsonConfig {
     public JsonConfig(String fileName) {
         this.file = new File(fileName);
 
-        if(!file.exists()) {
-            InputStream defaultFile = JsonConfig.class.getResourceAsStream("/" + fileName);
+        InputStream defaultFile = JsonConfig.class.getResourceAsStream("/" + fileName);
 
+        if(!file.exists()) {
             try {
                 if(defaultFile != null)
                     Files.copy(defaultFile, this.file.toPath());
@@ -29,9 +29,20 @@ public class JsonConfig {
             } catch (IOException ex) {
                 Logger.getGlobal().log(Level.SEVERE, String.format("Failed to create configuration file: %s", ex.getMessage()));
             }
+
+            this.data = getData();
+            return;
         }
 
         this.data = getData();
+
+        try {
+            if(defaultFile == null)
+                return;
+
+            copyDefaults(new JSONObject(new String(defaultFile.readAllBytes())));
+        } catch (IOException ignore) {
+        }
     }
 
     public void save() {
@@ -61,12 +72,25 @@ public class JsonConfig {
         return this.data;
     }
 
+    private void copyDefaults(JSONObject defaults) {
+        for(String key : defaults.keySet()) {
+            if(!this.data.has(key))
+                this.data.put(key, defaults.get(key));
+            else if(defaults.get(key) instanceof JSONObject)
+                copyDefaults(defaults.getJSONObject(key));
+        }
+    }
+
     public void set(String key, Object value) {
         this.data.put(key, value);
     }
 
     public Object get(String key) {
         return this.data.get(key);
+    }
+
+    public JSONObject getJsonObject(String key) {
+        return this.data.getJSONObject(key);
     }
 
 }

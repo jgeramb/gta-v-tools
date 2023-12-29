@@ -47,11 +47,15 @@ public class ImageUtil {
     }
 
     public static BufferedImage fromResource(String path) throws IOException {
-        return ImageIO.read(Objects.requireNonNull(ImageUtil.class.getResource(path)));
+        return ImageIO.read(Objects.requireNonNull(ImageUtil.class.getResource("/" + SystemUtil.RESOLUTION + path)));
     }
 
     public static BufferedImage transform(BufferedImage image, boolean binary) {
         return transform(image, 0, 0, image.getWidth(), image.getHeight(), binary);
+    }
+
+    public static BufferedImage transform(BufferedImage image,Rectangle rectangle, boolean binary) {
+        return transform(image, rectangle.x, rectangle.y, rectangle.width, rectangle.height, binary);
     }
 
     public static BufferedImage transform(BufferedImage image,
@@ -68,6 +72,10 @@ public class ImageUtil {
         resizedImageGraphics.dispose();
 
         return resizedImage;
+    }
+
+    public static BufferedImage crop(BufferedImage image, Rectangle rectangle) {
+        return crop(image, rectangle.x, rectangle.y, rectangle.width, rectangle.height);
     }
 
     public static BufferedImage crop(BufferedImage image, int x, int y, int width, int height) {

@@ -24,13 +24,13 @@ public class DrainageGrate extends Tool {
         sleep(500);
         mouseClick("LEFT", (2 * 7 + 2 * 9) * 6 * 185 + 1_000L);
 
-        String[] keys = new String[]{"D", "S", "A", "W"};
+        String[] keys = new String[] { "D", "S", "A", "W" };
 
         for (int line = 0; line < 4; line++) {
             boolean horizontal = (line % 2) == 0;
 
             for (int i = 0; i < (horizontal ? 7 : 9) * 6; i++) {
-                if (cancel)
+                if (this.cancel)
                     return;
 
                 keyPress(keys[line], horizontal ? 21 : 23);
@@ -43,7 +43,7 @@ public class DrainageGrate extends Tool {
 
     @Override
     public void forceStop() {
-        cancel = true;
+        this.cancel = true;
     }
 
 }

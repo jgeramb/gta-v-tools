@@ -17,6 +17,7 @@ public abstract class Tool extends View {
     private final Category category;
     private final Rectangle screenRect;
     private final List<Setting> settings;
+    protected RelativeToolData relativeData;
 
     protected Tool(Logger logger, Category category, String displayName) {
         super(GTAVTools.getGui().getMainView().getCategoryView(category), displayName);
@@ -28,6 +29,7 @@ public abstract class Tool extends View {
 
         this.screenRect = new Rectangle(0, 0, (int) Math.round(screenBounds.getWidth()), (int) Math.round(screenBounds.getHeight()));
         this.settings = new ArrayList<>();
+        this.relativeData = new RelativeToolData();
     }
 
     public abstract void execute() throws Exception;

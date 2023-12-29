@@ -13,18 +13,21 @@ public class StartCayoPerico extends Tool {
     public StartCayoPerico(Logger logger) {
         super(logger, Category.MISSION, "Start Cayo Perico");
 
+        this.relativeData.addRect("1920x1200", "interaction_menu_ceo", 35, 175, 190, 24);
+        this.relativeData.addRect("1920x1080", "interaction_menu_ceo", 35, 160, 175, 22);
+
         this.waitingForOtherPlayers = false;
         this.waitingForCutDefinition = false;
     }
 
     @Override
     public void execute() {
-        if (!(waitingForOtherPlayers || waitingForCutDefinition)) {
+        if (!(this.waitingForOtherPlayers || this.waitingForCutDefinition)) {
             // Check if already CEO
             SystemUtil.keyPress("M", 25);
             SystemUtil.sleep(250);
 
-            if (OCRUtil.ocr(SystemUtil.screenshot(35, 175, 190, 24)).equals("SecuroServ-CEO")) {
+            if (OCRUtil.ocr(SystemUtil.screenshot(this.relativeData.getRect("interaction_menu_ceo"))).equals("SecuroServ-CEO")) {
                 SystemUtil.keyPress("ESCAPE", 15);
                 SystemUtil.sleep(20);
             } else {
@@ -57,8 +60,8 @@ public class StartCayoPerico extends Tool {
             SystemUtil.keyPress("ENTER", 25);
             SystemUtil.sleep(30);
 
-            waitingForOtherPlayers = true;
-        } else if (waitingForOtherPlayers) {
+            this.waitingForOtherPlayers = true;
+        } else if (this.waitingForOtherPlayers) {
             // Confirm mission settings
             SystemUtil.keyPress("UP", 15);
             SystemUtil.sleep(20);
@@ -170,8 +173,8 @@ public class StartCayoPerico extends Tool {
             SystemUtil.keyPress("ENTER", 15);
             SystemUtil.sleep(20);
 
-            waitingForOtherPlayers = false;
-            waitingForCutDefinition = true;
+            this.waitingForOtherPlayers = false;
+            this.waitingForCutDefinition = true;
         } else {
             SystemUtil.keyPress("ESCAPE", 15);
             SystemUtil.sleep(150);
@@ -184,14 +187,14 @@ public class StartCayoPerico extends Tool {
                 SystemUtil.sleep(500);
             }
 
-            waitingForCutDefinition = false;
+            this.waitingForCutDefinition = false;
         }
     }
 
     @Override
     public void forceStop() {
-        waitingForOtherPlayers = false;
-        waitingForCutDefinition = false;
+        this.waitingForOtherPlayers = false;
+        this.waitingForCutDefinition = false;
     }
 
 }

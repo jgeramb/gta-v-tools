@@ -184,7 +184,7 @@ public class GUI extends JFrame {
     }
 
     public void handleKeyInput(String key) {
-        if (!(open))
+        if (!open)
             return;
 
         switch (key) {

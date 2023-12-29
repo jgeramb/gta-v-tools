@@ -1,5 +1,6 @@
 package dev.justix.gtavtools.tools.misc;
 
+import dev.justix.gtavtools.config.ApplicationConfig;
 import dev.justix.gtavtools.logging.Logger;
 import dev.justix.gtavtools.tools.Category;
 import dev.justix.gtavtools.tools.Tool;
@@ -29,7 +30,7 @@ public class RepairAllVehicles extends Tool {
         SystemUtil.keyPress("ENTER", 15);
         SystemUtil.sleep(500);
 
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < ApplicationConfig.CONFIG.getJsonObject("contactIndices").getInt("Mors Mutual Insurance"); i++) {
             if (this.cancel)
                 return;
 

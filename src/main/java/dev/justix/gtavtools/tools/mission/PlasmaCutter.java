@@ -21,7 +21,7 @@ public class PlasmaCutter extends Tool {
         logger.log(Level.INFO, "Cutting glass...");
 
         for (int i = 0; i < 5; i++) {
-            if (cancel)
+            if (this.cancel)
                 return;
 
             SystemUtil.keyPress("PAGE_UP", 1975);
@@ -33,7 +33,7 @@ public class PlasmaCutter extends Tool {
 
     @Override
     public void forceStop() {
-        cancel = true;
+        this.cancel = true;
     }
 
 }
