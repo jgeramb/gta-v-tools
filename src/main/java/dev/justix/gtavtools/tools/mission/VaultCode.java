@@ -17,6 +17,8 @@ public class VaultCode extends Tool {
 
         this.relativeData.addRect("1920x1200", "code", 181, 917, 81, 22);
 
+        this.relativeData.addRect("1920x1080", "code", 168, 822, 73, 20);
+
         this.cancel = false;
         this.vaultCode = null;
     }
@@ -50,9 +52,9 @@ public class VaultCode extends Tool {
                     SystemUtil.sleep(8);
                 }
 
-                SystemUtil.sleep(20);
-                SystemUtil.mouseClick("LEFT", 20);
-                SystemUtil.sleep(70);
+                SystemUtil.sleep(25);
+                SystemUtil.mouseClick("LEFT", 25);
+                SystemUtil.sleep(75);
             }
 
             logger.log(Level.INFO, "Vault unlocked successfully");

@@ -154,7 +154,7 @@ public class ImageUtil {
         return matchPercentage.get();
     }
 
-    private static double compare(int[][] image1Colors, int[][] image2Colors, int xOffset, int yOffset, boolean checkBlack) {
+    public static double compare(int[][] image1Colors, int[][] image2Colors, int xOffset, int yOffset, boolean checkBlack) {
         final int image1Height = image1Colors.length, image1Width = image1Colors[0].length;
         final int image2Height = image2Colors.length, image2Width = image2Colors[0].length;
         int checked = 0, matches = 0;
