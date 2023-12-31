@@ -24,7 +24,7 @@ public class FingerprintHack extends Tool {
         super(logger, Category.MISSION, "Fingerprint Hack");
 
         this.relativeData.add("1920x1200", "part_height", 66);
-        this.relativeData.addRect("1920x1200", "expected", 1008, 384, 480, 680);
+        this.relativeData.addRect("1920x1200", "expected", 1040, 384, 448, 680);
         this.relativeData.addRect("1920x1200", "expected_resized", 0, 0, 410, 618);
         this.relativeData.add("1920x1200", "expected_y_offset", 9);
         this.relativeData.addRect("1920x1200", "current", 366, 397, 410, 662);
@@ -173,7 +173,7 @@ public class FingerprintHack extends Tool {
                             return;
 
                         keyPress(right ? "D" : "A", 10);
-                        sleep(15);
+                        sleep(14);
                     }
                 }
 
@@ -181,7 +181,7 @@ public class FingerprintHack extends Tool {
                     return;
 
                 keyPress("S", 10);
-                sleep(15);
+                sleep(14);
             }
         }
     }

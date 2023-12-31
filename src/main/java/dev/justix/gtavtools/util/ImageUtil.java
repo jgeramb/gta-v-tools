@@ -1,5 +1,6 @@
 package dev.justix.gtavtools.util;
 
+import dev.justix.gtavtools.config.ApplicationConfig;
 import dev.justix.gtavtools.logging.Level;
 import dev.justix.gtavtools.logging.Logger;
 
@@ -39,7 +40,7 @@ public class ImageUtil {
             ImageIO.write(
                     image,
                     "PNG",
-                    new File("F:\\pictures\\screenshots", name + ".png")
+                    new File(ApplicationConfig.CONFIG.getString("debugImageDirectory"), name + ".png")
             );
         } catch (IOException ex) {
             LOGGER.log(Level.WARNING, "Could not save debug image: " + ex.getMessage());

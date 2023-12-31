@@ -26,7 +26,7 @@ public class VaultCode extends Tool {
     @Override
     public void execute() {
         if (this.vaultCode == null) {
-            String ocr = OCRUtil.ocr(SystemUtil.screenshot(this.relativeData.getRect("code")));
+            String ocr = OCRUtil.ocr(SystemUtil.screenshot(this.relativeData.getRect("code")), false);
 
             if (ocr.length() > "00-00-00".length())
                 ocr = ocr.substring(0, "00-00-00".length());
@@ -45,8 +45,7 @@ public class VaultCode extends Tool {
                 boolean up = codePart <= 50;
 
                 for (int j = 0; j < (up ? codePart : (100 - codePart)); j++) {
-                    if (this.cancel)
-                        return;
+                    if (this.cancel) return;
 
                     SystemUtil.keyPress(up ? "W" : "S", 4);
                     SystemUtil.sleep(8);
@@ -57,7 +56,7 @@ public class VaultCode extends Tool {
                 SystemUtil.sleep(75);
             }
 
-            logger.log(Level.INFO, "Vault unlocked successfully");
+            logger.log(Level.INFO, "Vault unlocked");
 
             this.vaultCode = null;
         }

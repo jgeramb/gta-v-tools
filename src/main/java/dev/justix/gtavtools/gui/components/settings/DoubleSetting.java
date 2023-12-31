@@ -16,18 +16,18 @@ public class DoubleSetting extends Setting {
 
     @Override
     public void increase() {
-        if (doubleValue() >= (min + step))
-            value = doubleValue() - step;
+        if (doubleValue() >= (this.min + this.step))
+            value = doubleValue() - this.step;
         else
-            value = min;
+            value = this.min;
     }
 
     @Override
     public void decrease() {
-        if (doubleValue() <= (max - step))
-            value = doubleValue() + step;
+        if (doubleValue() <= (this.max - this.step))
+            value = doubleValue() + this.step;
         else
-            value = max;
+            value = this.max;
     }
 
 }

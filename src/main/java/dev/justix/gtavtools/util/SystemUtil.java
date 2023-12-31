@@ -309,14 +309,6 @@ public class SystemUtil {
         };
     }
 
-    public static String getButtonName(int button) {
-        return switch (button) {
-            case 2 -> "RIGHT";
-            case 3 -> "MIDDLE";
-            default -> "LEFT";
-        };
-    }
-
     public static Robot robot() {
         return ROBOT;
     }

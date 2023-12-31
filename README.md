@@ -1,10 +1,22 @@
 # GTA V Tools
+This program provides a menu overlay for GTA V that allows you to quickly access
+some useful tools to make your life easier. This includes:
+- Replay glitch for all heists (including Cayo Perico) and the Agency VIP Contract
+- Automatic fingerprint hack for the Cayo Perico heist
+- Solo lobby creation 
+- ... and many more!
 
 ## Requirements
-- JDK 19
-- Run configurations & batch files must be run as administrator
-- Npcap must be installed in WinPcap Compatible Mode
+- JDK 19 or later (recommended: [OpenJDK  21](https://jdk.java.net/21/))
+- [PsSuspend](https://download.sysinternals.com/files/PSTools.zip) must be in your PATH
 - GTA V must be running in windowed borderless mode at full screen resolution
+
+## How to use
+- Run the 'run.bat' file as administrator
+- Keybindings:
+  - RSHIFT: Open the menu
+  - Escape: Close the menu 
+  - Ctrl + Pause: Exit the program
 
 ## License
 This project is licensed under the permissive MIT license. Please see [`LICENSE`](https://github.com/jgeramb/gta-v-tools/blob/main/LICENSE) for more info.

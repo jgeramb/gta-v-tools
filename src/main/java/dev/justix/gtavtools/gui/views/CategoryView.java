@@ -8,10 +8,10 @@ import lombok.Getter;
 import java.util.ArrayList;
 import java.util.List;
 
+@Getter
 public class CategoryView extends View {
 
     private final List<Tool> components;
-    @Getter
     private final Category category;
 
     public CategoryView(MainView mainView, Category category) {
@@ -21,13 +21,8 @@ public class CategoryView extends View {
         this.category = category;
     }
 
-    @Override
-    public List<Tool> getComponents() {
-        return components;
-    }
-
     public void addTool(Tool tool) {
-        components.add(tool);
+        this.components.add(tool);
     }
 
 }

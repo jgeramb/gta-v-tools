@@ -8,6 +8,11 @@ import dev.justix.gtavtools.util.SystemUtil;
 
 public class AutoShoot extends Tool {
 
+
+    private static final int TARGET_COLOR = -4108465;
+
+
+
     private boolean enabled;
 
     public AutoShoot(Logger logger) {
@@ -18,31 +23,28 @@ public class AutoShoot extends Tool {
 
     @Override
     public void execute() {
-        if (enabled)
-            logger.log(Level.INFO, "Auto shoot: disabled");
-        else {
-            int target = -4108465;
+        this.enabled = !this.enabled;
+        logger.log(Level.INFO, "Auto shoot: " + (this.enabled ? "enabled" : "disabled"));
+
+        if(this.enabled) {
+            final int x = screenWidth() / 2, y = screenHeight() / 2;
 
             new Thread(() -> {
-                while (enabled) {
-                    if (SystemUtil.getScreenPixelColor(screenWidth() / 2, screenHeight() / 2).getRGB() == target) {
-                        SystemUtil.mouseClick("LEFT", 15);
-                        SystemUtil.sleep(15);
+                while (this.enabled) {
+                    if (SystemUtil.getScreenPixelColor(x, y).getRGB() == TARGET_COLOR) {
+                        SystemUtil.mouseClick("LEFT", 10);
+                        SystemUtil.sleep(10);
                     }
 
                     SystemUtil.sleep(8);
                 }
             }).start();
-
-            logger.log(Level.INFO, "Auto shoot: enabled");
         }
-
-        enabled = !(enabled);
     }
 
     @Override
     public void forceStop() {
-        enabled = false;
+        this.enabled = false;
     }
 
 }

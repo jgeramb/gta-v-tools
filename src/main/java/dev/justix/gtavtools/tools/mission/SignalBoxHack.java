@@ -91,11 +91,13 @@ public class SignalBoxHack extends Tool {
                     // Check if factors match result
                     if (((factor1 * number1) + (factor2 * number2) + (factor3 * number3)) == result) {
                         if (DEBUG) {
-                            logger.log(Level.INFO,
+                            logger.log(
+                                    Level.INFO,
                                     "Solution: " +
                                             "1 -> " + (factor1Index + 1) + "; " +
                                             "2 -> " + (factor2Index + 1) + "; " +
-                                            "3 -> " + (factor3Index + 1));
+                                            "3 -> " + (factor3Index + 1)
+                            );
                         } else {
                             int[] solution = new int[]{factor1Index, factor2Index, factor3Index};
 
@@ -151,12 +153,12 @@ public class SignalBoxHack extends Tool {
         final int width = source.getWidth(), height = source.getHeight();
         final int whiteRGB = Color.white.getRGB();
         final BufferedImage image = comparableImage(source);
-        boolean is1 = image.getRGB(width / 2,           height / 16)       == whiteRGB,
-                is2 = image.getRGB(width / 6,           height / 4)        == whiteRGB,
-                is3 = image.getRGB((int) (width / 6d * 5), height / 4)        == whiteRGB,
-                is4 = image.getRGB(width / 2,           height / 2)        == whiteRGB,
-                is5 = image.getRGB(width / 6,           (int) (height / 1.5)) == whiteRGB,
-                is6 = image.getRGB((int) (width / 6d * 5), (int) (height / 1.5)) == whiteRGB;
+        boolean is1 = image.getRGB(width / 2,           height / 16)        == whiteRGB,
+                is2 = image.getRGB(width / 6,           height / 4)         == whiteRGB,
+                is3 = image.getRGB((int) (width / 6d * 5), height / 4)         == whiteRGB,
+                is4 = image.getRGB(width / 2,           (int) (height * 0.45)) == whiteRGB,
+                is5 = image.getRGB(width / 6,           (int) (height / 1.5))  == whiteRGB,
+                is6 = image.getRGB((int) (width / 6d * 5), (int) (height / 1.5))  == whiteRGB;
 
         if (is1 && is2) {
             if (is5) {

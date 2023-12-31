@@ -1,7 +1,8 @@
 {
+  "debugImageDirectory": "F:\\pictures\\screenshots",
   "networkInterfaceName": "Intel - 1 Gbit",
   "contactIndices": {
     "Mechanic": 2,
-    "Mors Mutual Insurance": 4
+    "Mors Mutual Insurance": 3
   }
 }

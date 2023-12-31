@@ -20,7 +20,7 @@ public class JsonConfig {
 
         InputStream defaultFile = JsonConfig.class.getResourceAsStream("/" + fileName);
 
-        if(!file.exists()) {
+        if(!this.file.exists()) {
             try {
                 if(defaultFile != null)
                     Files.copy(defaultFile, this.file.toPath());
@@ -81,12 +81,12 @@ public class JsonConfig {
         }
     }
 
-    public void set(String key, Object value) {
-        this.data.put(key, value);
-    }
-
     public Object get(String key) {
         return this.data.get(key);
+    }
+
+    public String getString(String key) {
+        return this.data.getString(key);
     }
 
     public JSONObject getJsonObject(String key) {

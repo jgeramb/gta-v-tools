@@ -1,4 +1,4 @@
 @echo off
 cls
 cd /d "%~dp0"
-java -jar target\gta-v-tools.jar --no-record
+java -jar target\gta-v-tools.jar

@@ -15,7 +15,7 @@ public abstract class Setting extends Component {
     }
 
     private Object getValue() {
-        return (value == null) ? defaultValue : value;
+        return (this.value == null) ? this.defaultValue : this.value;
     }
 
     public abstract void increase();

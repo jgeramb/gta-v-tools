@@ -22,7 +22,9 @@ public class OCRUtil {
         }
     }
 
-    public static String ocr(BufferedImage image) {
+    public static String ocr(BufferedImage image, boolean allowLetters) {
+        tesseract.setVariable("tessedit_char_whitelist", "0123456789-" + (allowLetters ? "abcdefghijklmnopqrstuvwxyzäöüABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÜ" : ""));
+
         try {
             return tesseract.doOCR(image).strip();
         } catch (TesseractException ignore) {

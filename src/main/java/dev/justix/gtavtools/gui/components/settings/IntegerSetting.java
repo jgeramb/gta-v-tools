@@ -16,18 +16,18 @@ public class IntegerSetting extends Setting {
 
     @Override
     public void increase() {
-        if (integerValue() >= (min + step))
-            value = integerValue() - step;
+        if (integerValue() >= (this.min + this.step))
+            value = integerValue() - this.step;
         else
-            value = min;
+            value = this.min;
     }
 
     @Override
     public void decrease() {
-        if (integerValue() <= (max - step))
-            value = integerValue() + step;
+        if (integerValue() <= (this.max - this.step))
+            value = integerValue() + this.step;
         else
-            value = max;
+            value = this.max;
     }
 
 }

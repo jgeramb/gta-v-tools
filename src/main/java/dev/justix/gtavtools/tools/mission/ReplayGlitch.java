@@ -6,24 +6,19 @@ import dev.justix.gtavtools.logging.Level;
 import dev.justix.gtavtools.logging.Logger;
 import dev.justix.gtavtools.tools.Category;
 import dev.justix.gtavtools.tools.Tool;
-import dev.justix.gtavtools.util.ImageUtil;
 import dev.justix.gtavtools.util.InterfaceNavigationUtil;
 import dev.justix.gtavtools.util.OCRUtil;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.awt.image.RescaleOp;
-import java.io.IOException;
-import java.util.Locale;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static dev.justix.gtavtools.util.SystemUtil.*;
 
 public class ReplayGlitch extends Tool {
 
-    private static final float REQUIRED_MATCH_PERCENTAGE = 0.8925f;
-
-    private final int[][] requiredPosition;
     private boolean matched, cancel;
 
     public ReplayGlitch(Logger logger) {
@@ -33,19 +28,13 @@ public class ReplayGlitch extends Tool {
         addSetting(new BooleanSetting(this, "Cayo Perico", true));
         addSetting(new BooleanSetting(this, "VIP Contract", false));
 
-        this.relativeData.addRect("1920x1200", "cayo_perico_glitch", 1180, 640, 120, 260);
+        this.relativeData.addRect("1920x1200", "cayo_perico_glitch", 1524, 1097, 100, 17);
         this.relativeData.addRect("1920x1200", "vip_contract_text", 132, 400, 160, 50);
         this.relativeData.addRect("1920x1200", "completed_text", 0, 215, 620, 150);
 
-        this.relativeData.addRect("1920x1080", "cayo_perico_glitch", 1160, 580, 100, 220);
+        this.relativeData.addRect("1920x1080", "cayo_perico_glitch", 1618, 1037, 100, 17);
         this.relativeData.addRect("1920x1080", "vip_contract_text", 40, 342, 160, 52);
         this.relativeData.addRect("1920x1080", "completed_text", 77, 260, 565, 127);
-
-        try {
-            this.requiredPosition = ImageUtil.getPixels(comparableImage(ImageUtil.fromResource("/mission-images/cayo-perico-glitch.png")));
-        } catch (IOException ignore) {
-            throw new RuntimeException("Failed to load required position image");
-        }
     }
 
     @Override
@@ -63,56 +52,37 @@ public class ReplayGlitch extends Tool {
 
             // take screenshots
             new Thread(() -> {
-                 final String key = cayoPerico ? "cayo_perico_glitch" : (vipContract ? "vip_contract_text" : "completed_text");
-                 final Rectangle rect = this.relativeData.getRect(key);
+                final String key = cayoPerico ? "cayo_perico_glitch" : (vipContract ? "vip_contract_text" : "completed_text");
+                final Rectangle rect = this.relativeData.getRect(key);
 
-                 while (!this.cancel && !this.matched) {
-                     screenshot.set(screenshot(rect));
+                while (!this.cancel && !this.matched) {
+                    screenshot.set(screenshot(rect));
 
                     synchronized (screenshotLock) {
                         screenshotLock.notify();
                     }
-                 }
+                }
             }).start();
 
-            // check for match
+            // check text
             while (!this.cancel && !this.matched) {
                 synchronized (screenshotLock) {
                     screenshotLock.wait();
                 }
 
-                if (cayoPerico) {
-                    double matchPercentage = ImageUtil.compare(
-                            this.requiredPosition,
-                            ImageUtil.getPixels(comparableImage(screenshot.get())),
-                            0,
-                            0,
-                            true
-                    );
-                    this.matched = matchPercentage >= REQUIRED_MATCH_PERCENTAGE;
-
-                    if(this.matched)
-                        logger.log(Level.INFO, "Position matched (" + (Math.round(matchPercentage * 100 * 10d) / 10d) + "%)");
-                    else if (DEBUG && (matchPercentage >= (REQUIRED_MATCH_PERCENTAGE - 0.025)))
-                        System.out.printf(Locale.US, "%d%% position similarity\n", Math.round(matchPercentage * 100));
-                } else {
-                    this.matched = OCRUtil.ocr(screenshot.get()).equals(vipContract ? "MISSION" : "RAUBÜBERFALL");
-
-                    if (this.matched)
-                        logger.log(Level.INFO, "Text matched");
-                }
+                this.matched = OCRUtil.ocr(screenshot.get(), true).equals(cayoPerico ? "Transaktion" : (vipContract ? "MISSION" : "RAUBÜBERFALL"));
             }
 
             if (this.cancel)
                 return;
 
-            if (!DEBUG) {
-                if (cayoPerico)
-                    sleep(booleanValue("Elite", true) ? 375 : 255);
+            logger.log(Level.INFO, "Performing replay glitch at " + new SimpleDateFormat("HH:mm:ss.SSS").format(new Date()));
 
-                logger.log(Level.INFO, "Performing replay glitch...");
+            if (!DEBUG) {
+                sleep(cayoPerico ? (booleanValue("Elite", true) ? 15 : 0) : 10);
 
                 // Disable network
+                Runtime.getRuntime().exec(new String[] { "pssuspend", "GTA5.exe" });
                 Runtime.getRuntime().exec(new String[] {
                         "netsh",
                         "interface",
@@ -121,6 +91,7 @@ public class ReplayGlitch extends Tool {
                         String.format("\"%s\"", ApplicationConfig.CONFIG.get("networkInterfaceName")),
                         "disable"
                 }).waitFor();
+                Runtime.getRuntime().exec(new String[] { "pssuspend", "-r", "GTA5.exe" });
 
                 sleep(16750L);
                 keyPress("ENTER", 50L);
@@ -175,12 +146,6 @@ public class ReplayGlitch extends Tool {
     @Override
     public void forceStop() {
         this.cancel = true;
-    }
-
-    private BufferedImage comparableImage(BufferedImage image) {
-        new RescaleOp(3.3f, 80, null).filter(image, image);
-
-        return ImageUtil.transform(image, true);
     }
 
 }

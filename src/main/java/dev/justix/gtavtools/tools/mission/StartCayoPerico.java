@@ -27,7 +27,7 @@ public class StartCayoPerico extends Tool {
             SystemUtil.keyPress("M", 25);
             SystemUtil.sleep(250);
 
-            if (OCRUtil.ocr(SystemUtil.screenshot(this.relativeData.getRect("interaction_menu_ceo"))).equals("SecuroServ-CEO")) {
+            if (OCRUtil.ocr(SystemUtil.screenshot(this.relativeData.getRect("interaction_menu_ceo")), true).equals("SecuroServ-CEO")) {
                 SystemUtil.keyPress("ESCAPE", 15);
                 SystemUtil.sleep(20);
             } else {

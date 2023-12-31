@@ -33,4 +33,18 @@ public class InterfaceNavigationUtil {
         sleep(500L);
     }
 
+    public static void openPhoneContacts() {
+        SystemUtil.keyPress("UP", 15);
+        SystemUtil.sleep(600);
+
+        SystemUtil.keyPress("UP", 15);
+        SystemUtil.sleep(80);
+
+        SystemUtil.keyPress("RIGHT", 15);
+        SystemUtil.sleep(80);
+
+        SystemUtil.keyPress("ENTER", 15);
+        SystemUtil.sleep(500);
+    }
+
 }
