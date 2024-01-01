@@ -28,13 +28,13 @@ public class ReplayGlitch extends Tool {
         addSetting(new BooleanSetting(this, "Cayo Perico", true));
         addSetting(new BooleanSetting(this, "VIP Contract", false));
 
-        this.relativeData.addRect("1920x1200", "cayo_perico_glitch", 1524, 1097, 100, 17);
-        this.relativeData.addRect("1920x1200", "vip_contract_text", 132, 400, 160, 50);
-        this.relativeData.addRect("1920x1200", "completed_text", 0, 215, 620, 150);
+        this.relativeData.addRect("1920x1200", "cayo_perico_glitch", 1524, 1097, 19, 17);
+        this.relativeData.addRect("1920x1200", "vip_contract_text", 132, 400, 44, 50);
+        this.relativeData.addRect("1920x1200", "completed_text", 0, 215, 100, 150);
 
-        this.relativeData.addRect("1920x1080", "cayo_perico_glitch", 1618, 1037, 100, 17);
-        this.relativeData.addRect("1920x1080", "vip_contract_text", 40, 342, 160, 52);
-        this.relativeData.addRect("1920x1080", "completed_text", 77, 260, 565, 127);
+        this.relativeData.addRect("1920x1080", "cayo_perico_glitch", 1618, 1037, 19, 17);
+        this.relativeData.addRect("1920x1080", "vip_contract_text", 40, 342, 44, 52);
+        this.relativeData.addRect("1920x1080", "completed_text", 77, 260, 98, 127);
     }
 
     @Override
@@ -70,7 +70,8 @@ public class ReplayGlitch extends Tool {
                     screenshotLock.wait();
                 }
 
-                this.matched = OCRUtil.ocr(screenshot.get(), true).equals(cayoPerico ? "Transaktion" : (vipContract ? "MISSION" : "RAUBÜBERFALL"));
+                this.matched = OCRUtil.ocr(screenshot.get(), true)
+                        .equals(cayoPerico ? "Tr" : (vipContract ? "MI" : "RA"));
             }
 
             if (this.cancel)
@@ -79,10 +80,10 @@ public class ReplayGlitch extends Tool {
             logger.log(Level.INFO, "Performing replay glitch at " + new SimpleDateFormat("HH:mm:ss.SSS").format(new Date()));
 
             if (!DEBUG) {
-                sleep(cayoPerico ? (booleanValue("Elite", true) ? 15 : 0) : 10);
+                sleep(booleanValue("Elite", true) ? 150 : (cayoPerico ? 50 : 5));
 
                 // Disable network
-                Runtime.getRuntime().exec(new String[] { "pssuspend", "GTA5.exe" });
+                Runtime.getRuntime().exec(new String[] { "pssuspend", "GTA5.exe" }).waitFor();
                 Runtime.getRuntime().exec(new String[] {
                         "netsh",
                         "interface",
@@ -91,7 +92,7 @@ public class ReplayGlitch extends Tool {
                         String.format("\"%s\"", ApplicationConfig.CONFIG.get("networkInterfaceName")),
                         "disable"
                 }).waitFor();
-                Runtime.getRuntime().exec(new String[] { "pssuspend", "-r", "GTA5.exe" });
+                Runtime.getRuntime().exec(new String[] { "pssuspend", "-r", "GTA5.exe" }).waitFor();
 
                 sleep(16750L);
                 keyPress("ENTER", 50L);
