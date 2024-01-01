@@ -1,26 +1,17 @@
 package dev.justix.gtavtools.tools;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-import java.util.Optional;
-import java.util.stream.Stream;
-
 @Getter
+@AllArgsConstructor
 public enum Category {
 
     MISSION("Missions"),
     COMBAT("Combat"),
     LOBBY("Lobby"),
-    MISC("Miscellaneous");
+    MISC("Misc");
 
     final String displayName;
-
-    Category(String displayName) {
-        this.displayName = displayName;
-    }
-
-    public static Optional<Category> byDisplayName(String displayName) {
-        return Stream.of(values()).filter(category -> category.getDisplayName().equals(displayName)).findAny();
-    }
 
 }

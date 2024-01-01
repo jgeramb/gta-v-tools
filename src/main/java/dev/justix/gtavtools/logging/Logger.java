@@ -19,7 +19,12 @@ public class Logger {
     public void log(Level level, String message) {
         writeToStream(
                 ((System.out == this.out) && level.equals(Level.SEVERE)) ? System.err : this.out,
-                "[" + LocalDateTime.now().format(DATE_TIME_FORMATTER) + " " + level.name() + ": " + Thread.currentThread().getName() + "] " + message + System.lineSeparator()
+                "[%s %s: %s] %s%n".formatted(
+                        LocalDateTime.now().format(DATE_TIME_FORMATTER),
+                        level.name(),
+                        Thread.currentThread().getName(),
+                        message
+                )
         );
     }
 

@@ -6,204 +6,147 @@ import dev.justix.gtavtools.logging.Level;
 import dev.justix.gtavtools.logging.Logger;
 import dev.justix.gtavtools.tools.Category;
 import dev.justix.gtavtools.tools.Tool;
-import dev.justix.gtavtools.util.ImageUtil;
 import dev.justix.gtavtools.util.InterfaceNavigationUtil;
 import dev.justix.gtavtools.util.OCRUtil;
 
+import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.awt.image.RescaleOp;
-import java.io.IOException;
-import java.util.Locale;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static dev.justix.gtavtools.util.SystemUtil.*;
 
 public class ReplayGlitch extends Tool {
 
-    private static final float REQUIRED_MATCH_PERCENTAGE = 0.915f;
-
-    private final BufferedImage requiredPosition;
-    private boolean waitingForPosition, instantGlitch, cancel;
+    private boolean matched, cancel;
 
     public ReplayGlitch(Logger logger) {
         super(logger, Category.MISSION, "Replay Glitch");
 
         addSetting(new BooleanSetting(this, "Elite", true));
-        addSetting(new BooleanSetting(this, "Match Text", false));
+        addSetting(new BooleanSetting(this, "Cayo Perico", true));
+        addSetting(new BooleanSetting(this, "VIP Contract", false));
 
-        BufferedImage requiredPositionImage = null;
+        this.relativeData.addRect("1920x1200", "cayo_perico_glitch", 1524, 1097, 19, 17);
+        this.relativeData.addRect("1920x1200", "vip_contract_text", 132, 400, 44, 50);
+        this.relativeData.addRect("1920x1200", "completed_text", 0, 215, 100, 150);
 
-        try {
-            requiredPositionImage = comparableImage(ImageUtil.fromResource("/mission-images/cayo-perico-glitch-position.png"));
-        } catch (IOException ignore) {
-        }
-
-        this.requiredPosition = requiredPositionImage;
-        this.waitingForPosition = false;
-        this.instantGlitch = false;
+        this.relativeData.addRect("1920x1080", "cayo_perico_glitch", 1618, 1037, 19, 17);
+        this.relativeData.addRect("1920x1080", "vip_contract_text", 40, 342, 44, 52);
+        this.relativeData.addRect("1920x1080", "completed_text", 77, 260, 98, 127);
     }
 
     @Override
     public void execute() {
         this.cancel = false;
+        this.matched = false;
 
-        if (this.waitingForPosition) {
-            this.logger.log(Level.INFO, "Skipping waiting for position...");
+        logger.log(Level.INFO, "Waiting for mission completion...");
 
-            this.instantGlitch = true;
-        } else {
-            this.instantGlitch = false;
-            this.waitingForPosition = true;
+        try {
+            final boolean cayoPerico = booleanValue("Cayo Perico", true);
+            final boolean vipContract = booleanValue("VIP Contract", false);
+            final AtomicReference<BufferedImage> screenshot = new AtomicReference<>();
+            final Object screenshotLock = new Object();
 
-            this.logger.log(Level.INFO, "Waiting for mission completion...");
+            // take screenshots
+            new Thread(() -> {
+                final String key = cayoPerico ? "cayo_perico_glitch" : (vipContract ? "vip_contract_text" : "completed_text");
+                final Rectangle rect = this.relativeData.getRect(key);
 
-            try {
-                final boolean matchText = booleanValue("Match Text", false);
-                final AtomicReference<BufferedImage> currentScreenPart = new AtomicReference<>();
-                final Object imageLock = new Object();
-                Thread imageThread = null;
+                while (!this.cancel && !this.matched) {
+                    screenshot.set(screenshot(rect));
 
-                if (!(matchText)) {
-                    if (this.requiredPosition == null)
-                        return;
-
-                    imageThread = new Thread(() -> {
-                        while (this.waitingForPosition) {
-                            currentScreenPart.set(comparableImage(screenshot(1176, 432, 220, 464)));
-
-                            synchronized (imageLock) {
-                                imageLock.notify();
-                            }
-                        }
-                    });
-                    imageThread.start();
-                }
-
-                int frames = 0;
-                long secondStart = System.currentTimeMillis();
-
-                while (!(this.instantGlitch || this.cancel)) {
-                    boolean matched;
-                    double matchPercentage = 0;
-
-                    if (matchText) {
-                        matched = OCRUtil.ocr(screenshot(0, 218, 617, 145)).equals("RAUBÜBERFALL")
-                                || OCRUtil.ocr(screenshot(132, 400, 160, 50)).equals("MISSION");
-                    } else {
-                        synchronized (imageLock) {
-                            imageLock.wait();
-                        }
-
-                        BufferedImage screenPart = currentScreenPart.get();
-
-                        // Compare images
-                        matchPercentage = ImageUtil.getMaxMatchPercentage(this.requiredPosition, screenPart, REQUIRED_MATCH_PERCENTAGE, 3, 3);
-                        matched = matchPercentage >= REQUIRED_MATCH_PERCENTAGE;
-
-                        currentScreenPart.set(null);
-
-                        if (DEBUG && (matchPercentage >= (REQUIRED_MATCH_PERCENTAGE - 0.025)))
-                            System.out.printf(Locale.US, "%d%% position similarity\n", Math.round(matchPercentage * 100));
-
-                        if (DEBUG) {
-                            frames++;
-
-                            if ((System.currentTimeMillis() - secondStart) >= 1000L) {
-                                System.out.println("FPS: " + frames);
-                                frames = 0;
-                                secondStart = System.currentTimeMillis();
-                            }
-                        }
-                    }
-
-                    if (matched) {
-                        this.logger.log(Level.INFO, "Mission completed (" + (matchText ? "text" : ("position " + (Math.round(matchPercentage * 100 * 10d) / 10d) + "%")) + " matched), performing replay glitch...");
-
-                        if (!matchText && !DEBUG)
-                            sleep(booleanValue("Elite", true) ? 375 : 255);
-                        break;
+                    synchronized (screenshotLock) {
+                        screenshotLock.notify();
                     }
                 }
+            }).start();
 
-                if (this.cancel)
-                    return;
-
-                if (imageThread != null)
-                    imageThread.interrupt();
-
-                this.waitingForPosition = false;
-
-                if (!(DEBUG)) {
-                    // Disable network
-                    Runtime.getRuntime().exec(new String[] {
-                            "netsh",
-                            "interface",
-                            "set",
-                            "interface",
-                            String.format("\"%s\"", ApplicationConfig.CONFIG.get("networkInterfaceName")),
-                            "disable"
-                    }).waitFor();
-
-                    sleep(16750L);
-                    keyPress("ENTER", 50L);
-
-                    // Reconnect network
-                    sleep(5000L);
-
-                    Runtime.getRuntime().exec(new String[]{
-                            "netsh",
-                            "interface",
-                            "set",
-                            "interface",
-                            String.format("\"%s\"", ApplicationConfig.CONFIG.get("networkInterfaceName")),
-                            "enable"
-                    }).waitFor();
-
-                    sleep(15000L);
-
-                    // Open Social Club
-                    keyPress("HOME", 50L);
-                    sleep(1250L);
-
-                    // Reconnect and close pop-up
-                    robot().mouseMove(1210, 334);
-                    sleep(150L);
-                    mouseClick("LEFT", 100L);
-
-                    sleep(4000L);
-
-                    // Close pop-up
-                    keyPress("ESCAPE", 50L);
-                    sleep(3500L);
-
-                    InterfaceNavigationUtil.openPlayOnlineOptions(true);
-
-                    // Select 'Invite-only session'
-                    keyPress("DOWN", 50L);
-                    sleep(150L);
-                    keyPress("ENTER", 50L);
-                    sleep(750L);
-
-                    // Accept warning
-                    keyPress("ENTER", 50L);
-
-                    this.logger.log(Level.INFO, "Glitch completed, connecting back to GTA Online");
+            // check text
+            while (!this.cancel && !this.matched) {
+                synchronized (screenshotLock) {
+                    screenshotLock.wait();
                 }
-            } catch (Exception ex) {
-                this.logger.log(Level.SEVERE, "An error occurred while executing tool: " + ex.getMessage());
+
+                this.matched = OCRUtil.ocr(screenshot.get(), true)
+                        .equals(cayoPerico ? "Tr" : (vipContract ? "MI" : "RA"));
             }
+
+            if (this.cancel)
+                return;
+
+            logger.log(Level.INFO, "Performing replay glitch at " + new SimpleDateFormat("HH:mm:ss.SSS").format(new Date()));
+
+            if (!DEBUG) {
+                sleep(booleanValue("Elite", true) ? 150 : (cayoPerico ? 50 : 5));
+
+                // Disable network
+                Runtime.getRuntime().exec(new String[] { "pssuspend", "GTA5.exe" }).waitFor();
+                Runtime.getRuntime().exec(new String[] {
+                        "netsh",
+                        "interface",
+                        "set",
+                        "interface",
+                        String.format("\"%s\"", ApplicationConfig.CONFIG.get("networkInterfaceName")),
+                        "disable"
+                }).waitFor();
+                Runtime.getRuntime().exec(new String[] { "pssuspend", "-r", "GTA5.exe" }).waitFor();
+
+                sleep(16750L);
+                keyPress("ENTER", 50L);
+
+                // Reconnect network
+                sleep(5000L);
+
+                Runtime.getRuntime().exec(new String[]{
+                        "netsh",
+                        "interface",
+                        "set",
+                        "interface",
+                        String.format("\"%s\"", ApplicationConfig.CONFIG.get("networkInterfaceName")),
+                        "enable"
+                }).waitFor();
+
+                sleep(15000L);
+
+                // Open Social Club
+                keyPress("HOME", 50L);
+                sleep(1250L);
+
+                // Reconnect and close pop-up
+                robot().mouseMove(1210, 334);
+                sleep(150L);
+                mouseClick("LEFT", 100L);
+
+                sleep(4000L);
+
+                // Close pop-up
+                keyPress("ESCAPE", 50L);
+                sleep(3500L);
+
+                InterfaceNavigationUtil.openPlayOnlineOptions(true);
+
+                // Select 'Invite-only session'
+                keyPress("DOWN", 50L);
+                sleep(150L);
+                keyPress("ENTER", 50L);
+                sleep(750L);
+
+                // Accept warning
+                keyPress("ENTER", 50L);
+
+                logger.log(Level.INFO, "Glitch completed, connecting back to GTA Online");
+            }
+        } catch (Exception ex) {
+            logger.log(Level.SEVERE, "An error occurred while executing tool: " + ex.getMessage());
         }
     }
 
     @Override
     public void forceStop() {
         this.cancel = true;
-    }
-
-    private BufferedImage comparableImage(BufferedImage image) {
-        new RescaleOp(3.3f, 80, null).filter(image, image);
-
-        return ImageUtil.transform(image, true);
     }
 
 }

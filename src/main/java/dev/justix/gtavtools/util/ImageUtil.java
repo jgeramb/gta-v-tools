@@ -1,5 +1,6 @@
 package dev.justix.gtavtools.util;
 
+import dev.justix.gtavtools.config.ApplicationConfig;
 import dev.justix.gtavtools.logging.Level;
 import dev.justix.gtavtools.logging.Logger;
 
@@ -39,7 +40,7 @@ public class ImageUtil {
             ImageIO.write(
                     image,
                     "PNG",
-                    new File("F:\\pictures\\screenshots", name + ".png")
+                    new File(ApplicationConfig.CONFIG.getString("debugImageDirectory"), name + ".png")
             );
         } catch (IOException ex) {
             LOGGER.log(Level.WARNING, "Could not save debug image: " + ex.getMessage());
@@ -47,11 +48,15 @@ public class ImageUtil {
     }
 
     public static BufferedImage fromResource(String path) throws IOException {
-        return ImageIO.read(Objects.requireNonNull(ImageUtil.class.getResource(path)));
+        return ImageIO.read(Objects.requireNonNull(ImageUtil.class.getResource("/" + SystemUtil.RESOLUTION + path)));
     }
 
     public static BufferedImage transform(BufferedImage image, boolean binary) {
         return transform(image, 0, 0, image.getWidth(), image.getHeight(), binary);
+    }
+
+    public static BufferedImage transform(BufferedImage image,Rectangle rectangle, boolean binary) {
+        return transform(image, rectangle.x, rectangle.y, rectangle.width, rectangle.height, binary);
     }
 
     public static BufferedImage transform(BufferedImage image,
@@ -68,6 +73,10 @@ public class ImageUtil {
         resizedImageGraphics.dispose();
 
         return resizedImage;
+    }
+
+    public static BufferedImage crop(BufferedImage image, Rectangle rectangle) {
+        return crop(image, rectangle.x, rectangle.y, rectangle.width, rectangle.height);
     }
 
     public static BufferedImage crop(BufferedImage image, int x, int y, int width, int height) {
@@ -146,7 +155,7 @@ public class ImageUtil {
         return matchPercentage.get();
     }
 
-    private static double compare(int[][] image1Colors, int[][] image2Colors, int xOffset, int yOffset, boolean checkBlack) {
+    public static double compare(int[][] image1Colors, int[][] image2Colors, int xOffset, int yOffset, boolean checkBlack) {
         final int image1Height = image1Colors.length, image1Width = image1Colors[0].length;
         final int image2Height = image2Colors.length, image2Width = image2Colors[0].length;
         int checked = 0, matches = 0;

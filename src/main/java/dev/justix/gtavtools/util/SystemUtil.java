@@ -9,10 +9,14 @@ public class SystemUtil {
 
     public static final boolean DEBUG = Boolean.parseBoolean(System.getProperty("app.debug", "false"));
 
+    public static final String RESOLUTION;
     private static final long SLEEP_PRECISION, SPIN_YIELD_PRECISION;
     private static final Robot ROBOT;
 
     static {
+        final Dimension screenBounds = Toolkit.getDefaultToolkit().getScreenSize();
+        RESOLUTION = screenBounds.width + "x" + screenBounds.height;
+
         SLEEP_PRECISION = TimeUnit.MILLISECONDS.toNanos(2);
         SPIN_YIELD_PRECISION = TimeUnit.MILLISECONDS.toNanos(2);
 
@@ -28,7 +32,11 @@ public class SystemUtil {
     }
 
     public static BufferedImage screenshot(int x, int y, int width, int height) {
-        return ROBOT.createScreenCapture(new Rectangle(x, y, width, height));
+        return screenshot(new Rectangle(x, y, width, height));
+    }
+
+    public static BufferedImage screenshot(Rectangle rectangle) {
+        return ROBOT.createScreenCapture(rectangle);
     }
 
     public static Color getScreenPixelColor(int x, int y) {
@@ -54,7 +62,6 @@ public class SystemUtil {
         }).start();
     }
 
-
     public static void mouseClick(String buttonName, long duration) {
         int keyCode = getMouseCode(buttonName);
 
@@ -64,21 +71,6 @@ public class SystemUtil {
             sleep(duration);
 
             ROBOT.mouseRelease(keyCode);
-        }).start();
-    }
-
-    public static void mouseMove(double fromX, double fromY, double toX, double toY, long duration) {
-        new Thread(() -> {
-            long moveSteps = duration / 15, durationStep = (long) Math.floor(duration / (double) moveSteps);
-            double xDiff = toX - fromX, yDiff = toY - fromY;
-
-            for (int i = 1; i <= moveSteps; i++) {
-                double progress = i / (double) moveSteps;
-
-                ROBOT.mouseMove((int) (fromX + (xDiff * progress)), (int) (fromY + (yDiff * progress)));
-
-                sleep(durationStep);
-            }
         }).start();
     }
 
@@ -314,14 +306,6 @@ public class SystemUtil {
             case "RIGHT" -> KeyEvent.BUTTON3_DOWN_MASK;
             case "MIDDLE" -> KeyEvent.BUTTON2_DOWN_MASK;
             default -> KeyEvent.BUTTON1_DOWN_MASK;
-        };
-    }
-
-    public static String getButtonName(int button) {
-        return switch (button) {
-            case 2 -> "RIGHT";
-            case 3 -> "MIDDLE";
-            default -> "LEFT";
         };
     }
 

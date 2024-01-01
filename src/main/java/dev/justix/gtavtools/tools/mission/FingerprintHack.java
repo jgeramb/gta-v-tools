@@ -23,6 +23,20 @@ public class FingerprintHack extends Tool {
     public FingerprintHack(Logger logger) {
         super(logger, Category.MISSION, "Fingerprint Hack");
 
+        this.relativeData.add("1920x1200", "part_height", 66);
+        this.relativeData.addRect("1920x1200", "expected", 1040, 384, 448, 680);
+        this.relativeData.addRect("1920x1200", "expected_resized", 0, 0, 410, 618);
+        this.relativeData.add("1920x1200", "expected_y_offset", 9);
+        this.relativeData.addRect("1920x1200", "current", 366, 397, 410, 662);
+        this.relativeData.add("1920x1200", "current_y_step", 84.5d);
+
+        this.relativeData.add("1920x1080", "part_height", 61);
+        this.relativeData.addRect("1920x1080", "expected", 1032, 348, 406, 602);
+        this.relativeData.addRect("1920x1080", "expected_resized", 0, 0, 366, 550);
+        this.relativeData.add("1920x1080", "expected_y_offset", 3);
+        this.relativeData.addRect("1920x1080", "current", 428, 358, 366, 592);
+        this.relativeData.add("1920x1080", "current_y_step", 75d);
+
         this.cancel = false;
     }
 
@@ -33,13 +47,14 @@ public class FingerprintHack extends Tool {
         logger.log(Level.INFO, "Hacking fingerprint...");
 
         // capture full screen
-        BufferedImage screen = screenshot(0, 0, 1920, 1200);
+        BufferedImage screen = screenshot(0, 0, screenWidth(), screenHeight());
 
         // expected fingerprint
-        BufferedImage expectedCapture = crop(screen, 1040, 384, 448, 680);
+        BufferedImage expectedCapture = crop(screen, this.relativeData.getRect("expected"));
         new RescaleOp(12f, -24, null).filter(expectedCapture, expectedCapture);
 
-        final BufferedImage expected = transform(expectedCapture, 0, 0, 410, 618, true);
+        final BufferedImage expected = transform(expectedCapture, this.relativeData.getRect("expected_resized"), true);
+        final double expectedYStep = expected.getHeight() / 8d;
         final int blockSize = BlockMatrixConverter.getBlockSize(getPixels(expected));
         final Rectangle bounds = BlockMatrixConverter.getLastBounds();
 
@@ -51,7 +66,8 @@ public class FingerprintHack extends Tool {
             int finalCurrentElement = currentElement;
 
             new Thread(() -> {
-                BufferedImage partCapture = crop(expected, bounds.x, (int) (finalCurrentElement * 77.5) + (bounds.y - 9), bounds.width, 66);
+                final int currentY = (int) (finalCurrentElement * expectedYStep) + (bounds.y - this.relativeData.getNumber("expected_y_offset"));
+                BufferedImage partCapture = crop(expected, bounds.x, currentY, bounds.width, this.relativeData.getNumber("part_height"));
                 BlockMatrix part = BlockMatrixConverter.convertBufferedImage(partCapture, blockSize);
 
                 debug(finalCurrentElement + "_expected", part.getPixels());
@@ -62,7 +78,7 @@ public class FingerprintHack extends Tool {
         }
 
         // current fingerprint parts
-        BufferedImage currentPartsCapture = crop(screen, 366, 397, 410, 662);
+        BufferedImage currentPartsCapture = crop(screen, this.relativeData.getRect("current"));
         new RescaleOp(16f, -72, null).filter(currentPartsCapture, currentPartsCapture);
 
         final BufferedImage currentPartsImage = transform(currentPartsCapture, true);
@@ -76,7 +92,9 @@ public class FingerprintHack extends Tool {
 
             new Thread(() -> {
                 // crop fingerprint to scan to current part
-                BufferedImage partCapture = crop(currentPartsImage, bounds.x, (int) (finalCurrentElement * 84.5), bounds.width, 66);
+                final int currentY = (int) (finalCurrentElement * this.relativeData.getDecimal("current_y_step"));
+
+                BufferedImage partCapture = crop(currentPartsImage, bounds.x, currentY, bounds.width, this.relativeData.getNumber("part_height"));
                 BlockMatrix part = BlockMatrixConverter.convertBufferedImage(partCapture, blockSize);
 
                 debug(String.valueOf(finalCurrentElement), part.getPixels());
@@ -89,7 +107,7 @@ public class FingerprintHack extends Tool {
         expectedPartsLatch.await();
         currentPartsLatch.await();
 
-        if (cancel)
+        if (this.cancel)
             return;
 
         // determine correct indices for each part of the fingerprint to scan
@@ -127,12 +145,12 @@ public class FingerprintHack extends Tool {
 
         indicesLatch.await();
 
-        if (cancel)
+        if (this.cancel)
             return;
 
         logger.log(Level.INFO, "Computation completed in " + (System.currentTimeMillis() - startMillis) + "ms");
 
-        if (!(DEBUG)) {
+        if (!DEBUG) {
             // change elements based on the difference between the correct index and the one of the part currently shown
             for (int currentIndex = 0; currentIndex < indices.length; currentIndex++) {
                 int indexDiff = currentIndex - indices[currentIndex];
@@ -151,26 +169,26 @@ public class FingerprintHack extends Tool {
                     }
 
                     for (int i = 0; i < indexDiff; i++) {
-                        if (cancel)
+                        if (this.cancel)
                             return;
 
-                        keyPress(right ? "D" : "A", 8);
-                        sleep(12);
+                        keyPress(right ? "D" : "A", 10);
+                        sleep(14);
                     }
                 }
 
-                if (cancel)
+                if (this.cancel)
                     return;
 
-                keyPress("S", 8);
-                sleep(12);
+                keyPress("S", 10);
+                sleep(14);
             }
         }
     }
 
     @Override
     public void forceStop() {
-        cancel = true;
+        this.cancel = true;
     }
 
 }

@@ -17,6 +17,7 @@ public abstract class Tool extends View {
     private final Category category;
     private final Rectangle screenRect;
     private final List<Setting> settings;
+    protected final RelativeToolData relativeData;
 
     protected Tool(Logger logger, Category category, String displayName) {
         super(GTAVTools.getGui().getMainView().getCategoryView(category), displayName);
@@ -28,6 +29,7 @@ public abstract class Tool extends View {
 
         this.screenRect = new Rectangle(0, 0, (int) Math.round(screenBounds.getWidth()), (int) Math.round(screenBounds.getHeight()));
         this.settings = new ArrayList<>();
+        this.relativeData = new RelativeToolData();
     }
 
     public abstract void execute() throws Exception;
@@ -36,11 +38,11 @@ public abstract class Tool extends View {
     }
 
     protected int screenWidth() {
-        return (int) screenRect.getWidth();
+        return (int) this.screenRect.getWidth();
     }
 
     protected int screenHeight() {
-        return (int) screenRect.getHeight();
+        return (int) this.screenRect.getHeight();
     }
 
     public void setThreadName() {
@@ -49,15 +51,20 @@ public abstract class Tool extends View {
 
     @Override
     public List<Setting> getComponents() {
-        return settings;
+        return this.settings;
     }
 
     protected void addSetting(Setting setting) {
-        settings.add(setting);
+        this.settings.add(setting);
     }
 
     protected Boolean booleanValue(String settingName, boolean defaultValue) {
-        return settings.stream().filter(setting -> setting.getName().equals(settingName)).findFirst().map(Setting::booleanValue).orElse(defaultValue);
+        return this.settings
+                .stream()
+                .filter(setting -> setting.getName().equals(settingName))
+                .findFirst()
+                .map(Setting::booleanValue)
+                .orElse(defaultValue);
     }
 
 }

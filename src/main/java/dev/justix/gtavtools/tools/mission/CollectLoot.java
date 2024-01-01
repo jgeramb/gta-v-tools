@@ -9,47 +9,43 @@ import dev.justix.gtavtools.util.SystemUtil;
 public class CollectLoot extends Tool {
 
     private boolean collecting;
-    private Thread thread;
 
     public CollectLoot(Logger logger) {
         super(logger, Category.MISSION, "Collect Loot");
 
         this.collecting = false;
-        this.thread = null;
     }
 
     @Override
     public void execute() {
-        if (collecting)
+        this.collecting = !this.collecting;
+
+        if (!this.collecting) {
             logger.log(Level.WARNING, "Loot collection interrupted");
-        else {
-            logger.log(Level.INFO, "Collecting loot...");
-
-            thread = new Thread(() -> {
-                Thread.currentThread().setName("Loot collection");
-
-                for (int i = 0; i < 34; i++) {
-                    if (!(collecting)) return;
-
-                    SystemUtil.mouseClick("LEFT", 25);
-                    SystemUtil.sleep(250);
-                }
-
-                logger.log(Level.INFO, "Collected loot successfully");
-
-                collecting = false;
-            });
-            thread.start();
+            return;
         }
 
-        collecting = !(collecting);
+        logger.log(Level.INFO, "Collecting loot...");
+
+        new Thread(() -> {
+            Thread.currentThread().setName("Loot collection");
+
+            for (int i = 0; i < 34; i++) {
+                if (!this.collecting) return;
+
+                SystemUtil.mouseClick("LEFT", 25);
+                SystemUtil.sleep(250);
+            }
+
+            logger.log(Level.INFO, "Collected loot successfully");
+
+            this.collecting = false;
+        }).start();
     }
 
     @Override
     public void forceStop() {
-        collecting = false;
-
-        thread.interrupt();
+        this.collecting = false;
     }
 
 }

@@ -50,10 +50,10 @@ public class ToolManager {
     }
 
     public void executeTool(Tool tool) {
-        final int id = lastId = lastId + 1;
+        final int id = this.lastId = this.lastId + 1;
 
         new Thread(() -> {
-            activeTools.put(id, tool);
+            this.activeTools.put(id, tool);
 
             tool.setThreadName();
 
@@ -65,13 +65,13 @@ public class ToolManager {
                 //noinspection CallToPrintStackTrace
                 ex.printStackTrace();
             } finally {
-                activeTools.remove(id);
+                this.activeTools.remove(id);
             }
         }).start();
     }
 
     public void forceStop() {
-        activeTools.values().forEach(Tool::forceStop);
+        this.activeTools.values().forEach(Tool::forceStop);
     }
 
 }

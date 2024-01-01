@@ -15,14 +15,18 @@ public class VaultCode extends Tool {
     public VaultCode(Logger logger) {
         super(logger, Category.MISSION, "Vault Code");
 
+        this.relativeData.addRect("1920x1200", "code", 181, 917, 81, 22);
+
+        this.relativeData.addRect("1920x1080", "code", 168, 822, 73, 20);
+
         this.cancel = false;
         this.vaultCode = null;
     }
 
     @Override
     public void execute() {
-        if (vaultCode == null) {
-            String ocr = OCRUtil.ocr(SystemUtil.screenshot(181, 917, 81, 22));
+        if (this.vaultCode == null) {
+            String ocr = OCRUtil.ocr(SystemUtil.screenshot(this.relativeData.getRect("code")), false);
 
             if (ocr.length() > "00-00-00".length())
                 ocr = ocr.substring(0, "00-00-00".length());
@@ -32,17 +36,16 @@ public class VaultCode extends Tool {
             String[] codeParts = ocr.split("-");
 
             try {
-                vaultCode = new int[]{Integer.parseInt(codeParts[0]), Integer.parseInt(codeParts[1]), Integer.parseInt(codeParts[2])};
+                this.vaultCode = new int[] { Integer.parseInt(codeParts[0]), Integer.parseInt(codeParts[1]), Integer.parseInt(codeParts[2]) };
             } catch (NumberFormatException ignore) {
             }
         } else {
             for (int i = 0; i < 3; i++) {
-                int codePart = vaultCode[i];
+                int codePart = this.vaultCode[i];
                 boolean up = codePart <= 50;
 
                 for (int j = 0; j < (up ? codePart : (100 - codePart)); j++) {
-                    if (cancel)
-                        return;
+                    if (this.cancel) return;
 
                     SystemUtil.keyPress(up ? "W" : "S", 4);
                     SystemUtil.sleep(8);
@@ -53,15 +56,15 @@ public class VaultCode extends Tool {
                 SystemUtil.sleep(75);
             }
 
-            logger.log(Level.INFO, "Vault unlocked successfully");
+            logger.log(Level.INFO, "Vault unlocked");
 
-            vaultCode = null;
+            this.vaultCode = null;
         }
     }
 
     @Override
     public void forceStop() {
-        cancel = true;
+        this.cancel = true;
     }
 
 }

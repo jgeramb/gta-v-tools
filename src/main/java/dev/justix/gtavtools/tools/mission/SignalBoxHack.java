@@ -20,6 +20,17 @@ public class SignalBoxHack extends Tool {
     public SignalBoxHack(Logger logger) {
         super(logger, Category.MISSION, "Signal Box Hack");
 
+        this.relativeData.addRect("1920x1200", "result", 830, 130, 250, 94);
+        this.relativeData.addRect("1920x1200", "result_number1", 0, 0, 50, 94);
+        this.relativeData.addRect("1920x1200", "result_number2", 102, 0, 50, 94);
+        this.relativeData.addRect("1920x1200", "result_number3", 200, 0, 50, 94);
+        this.relativeData.addRect("1920x1200", "number1", 437, 295, 50, 94);
+        this.relativeData.addRect("1920x1200", "number2", 437, 556, 50, 94);
+        this.relativeData.addRect("1920x1200", "number3", 437, 817, 50, 94);
+        this.relativeData.addRect("1920x1200", "factor1", 1390, 301, 78, 78);
+        this.relativeData.addRect("1920x1200", "factor2", 1390, 562, 78, 78);
+        this.relativeData.addRect("1920x1200", "factor3", 1390, 823, 78, 78);
+
         BufferedImage factor1Image = null, factor2Image = null, factor10Image = null;
 
         try {
@@ -36,17 +47,17 @@ public class SignalBoxHack extends Tool {
 
     @Override
     public void execute() {
-        BufferedImage resultImage = screenshot(830, 130, 250, 94);
-        int result = fromDigital(ImageUtil.crop(resultImage, 0, 0, 50, 94)) * 100
-                + fromDigital(ImageUtil.crop(resultImage, 102, 0, 50, 94)) * 10
-                + fromDigital(ImageUtil.crop(resultImage, 200, 0, 50, 94)),
-                number1 = fromDigital(screenshot(437, 295, 50, 94)),
-                number2 = fromDigital(screenshot(437, 556, 50, 94)),
-                number3 = fromDigital(screenshot(437, 817, 50, 94));
-        int[] factors = new int[]{
-                getFactor(screenshot(1390, 301, 78, 78)),
-                getFactor(screenshot(1390, 562, 78, 78)),
-                getFactor(screenshot(1390, 823, 78, 78))
+        BufferedImage resultImage = screenshot(this.relativeData.getRect("result"));
+        int result = fromDigital(ImageUtil.crop(resultImage, this.relativeData.getRect("result_number1"))) * 100
+                + fromDigital(ImageUtil.crop(resultImage, this.relativeData.getRect("result_number2"))) * 10
+                + fromDigital(ImageUtil.crop(resultImage, this.relativeData.getRect("result_number3"))),
+                number1 = fromDigital(screenshot(this.relativeData.getRect("number1"))),
+                number2 = fromDigital(screenshot(this.relativeData.getRect("number2"))),
+                number3 = fromDigital(screenshot(this.relativeData.getRect("number3")));
+        int[] factors = new int[] {
+                getFactor(screenshot(this.relativeData.getRect("factor1"))),
+                getFactor(screenshot(this.relativeData.getRect("factor2"))),
+                getFactor(screenshot(this.relativeData.getRect("factor3")))
         };
 
         logger.log(Level.INFO, "Calculating...");
@@ -77,15 +88,16 @@ public class SignalBoxHack extends Tool {
                     if (factor2Index == factor3Index)
                         continue;
 
-
                     // Check if factors match result
                     if (((factor1 * number1) + (factor2 * number2) + (factor3 * number3)) == result) {
                         if (DEBUG) {
-                            logger.log(Level.INFO,
+                            logger.log(
+                                    Level.INFO,
                                     "Solution: " +
                                             "1 -> " + (factor1Index + 1) + "; " +
                                             "2 -> " + (factor2Index + 1) + "; " +
-                                            "3 -> " + (factor3Index + 1));
+                                            "3 -> " + (factor3Index + 1)
+                            );
                         } else {
                             int[] solution = new int[]{factor1Index, factor2Index, factor3Index};
 
@@ -138,14 +150,15 @@ public class SignalBoxHack extends Tool {
     }
 
     private static int fromDigital(BufferedImage source) {
+        final int width = source.getWidth(), height = source.getHeight();
         final int whiteRGB = Color.white.getRGB();
         final BufferedImage image = comparableImage(source);
-        boolean is1 = image.getRGB(25, 6) == whiteRGB,
-                is2 = image.getRGB(8, 24) == whiteRGB,
-                is3 = image.getRGB(44, 24) == whiteRGB,
-                is4 = image.getRGB(25, 42) == whiteRGB,
-                is5 = image.getRGB(8, 64) == whiteRGB,
-                is6 = image.getRGB(44, 64) == whiteRGB;
+        boolean is1 = image.getRGB(width / 2,           height / 16)        == whiteRGB,
+                is2 = image.getRGB(width / 6,           height / 4)         == whiteRGB,
+                is3 = image.getRGB((int) (width / 6d * 5), height / 4)         == whiteRGB,
+                is4 = image.getRGB(width / 2,           (int) (height * 0.45)) == whiteRGB,
+                is5 = image.getRGB(width / 6,           (int) (height / 1.5))  == whiteRGB,
+                is6 = image.getRGB((int) (width / 6d * 5), (int) (height / 1.5))  == whiteRGB;
 
         if (is1 && is2) {
             if (is5) {

@@ -18,19 +18,11 @@ public class SoloLobby extends Tool {
     public void execute() throws IOException {
         logger.log(Level.INFO, "Pausing process for solo lobby creation...");
 
-        Runtime.getRuntime().exec(new String[]{
-                "cmd",
-                "/c",
-                "pssuspend GTA5.exe"
-        });
+        Runtime.getRuntime().exec(new String[] { "pssuspend", "GTA5.exe" });
 
         SystemUtil.sleep(10 * 1000L);
 
-        Runtime.getRuntime().exec(new String[]{
-                "cmd",
-                "/c",
-                "pssuspend -r GTA5.exe"
-        });
+        Runtime.getRuntime().exec(new String[] { "pssuspend", "-r", "GTA5.exe" });
 
         logger.log(Level.INFO, "Resuming process, solo lobby created");
     }
