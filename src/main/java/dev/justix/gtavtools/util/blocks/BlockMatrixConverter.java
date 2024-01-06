@@ -21,6 +21,14 @@ public class BlockMatrixConverter {
         );
     }
 
+    public static BlockMatrix convertPixels(int[][] pixels, int blockSize) {
+        return new BlockMatrix(
+                (int) Math.ceil((double) pixels[0].length / blockSize),
+                (int) Math.ceil((double) pixels.length / blockSize),
+                getBlocks(pixels, blockSize)
+        );
+    }
+
     public static int getBlockSize(int[][] pixels) {
         float blockSizeSum = 0;
         int blockCount = 0;

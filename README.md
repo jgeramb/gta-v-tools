@@ -8,11 +8,12 @@ some useful tools to make your life easier. This includes:
 
 ## Requirements
 - JDK 19 or later (recommended: [OpenJDK  21](https://jdk.java.net/21/))
-- [PsSuspend](https://download.sysinternals.com/files/PSTools.zip) must be in your PATH
+- [PsSuspend](https://learn.microsoft.com/en-us/sysinternals/downloads/pssuspend) must be in your PATH
+- [Npcap](https://npcap.com/#download) must be installed in WinPcap compatibility mode
 - GTA V must be running in windowed borderless mode at full screen resolution
 
 ## How to use
-- Run the 'run.bat' file as administrator
+- Open the 'run.bat' file as administrator
 - Keybindings:
   - RSHIFT: Open the menu
   - Escape: Close the menu 

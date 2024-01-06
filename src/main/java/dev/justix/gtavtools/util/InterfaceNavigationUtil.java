@@ -1,9 +1,17 @@
 package dev.justix.gtavtools.util;
 
-import static dev.justix.gtavtools.util.SystemUtil.keyPress;
-import static dev.justix.gtavtools.util.SystemUtil.sleep;
+import dev.justix.gtavtools.tools.RelativeToolData;
+
+import static dev.justix.gtavtools.util.SystemUtil.*;
 
 public class InterfaceNavigationUtil {
+
+    private static final RelativeToolData RELATIVE_DATA = new RelativeToolData();
+
+    static {
+        RELATIVE_DATA.addRect("1920x1200", "interaction_menu_ceo", 35, 175, 190, 24);
+        RELATIVE_DATA.addRect("1920x1080", "interaction_menu_ceo", 35, 160, 175, 22);
+    }
 
     public static void openPlayOnlineOptions(boolean isStoryMode) {
         keyPress("ESCAPE", 25);
@@ -45,6 +53,52 @@ public class InterfaceNavigationUtil {
 
         SystemUtil.keyPress("ENTER", 15);
         SystemUtil.sleep(500);
+    }
+
+    public static void openPlaningScreen() {
+        // Register as CEO
+        keyPress("M", 25);
+        sleep(250);
+
+        if (OCRUtil.ocr(screenshot(RELATIVE_DATA.getRect("interaction_menu_ceo")), true).equals("SecuroServ-CEO")) {
+            keyPress("ESCAPE", 15);
+            sleep(20);
+        } else {
+            for (int i = 0; i < 2; i++) {
+                keyPress("DOWN", 15);
+                sleep(20);
+            }
+
+            for (int i = 0; i < 3; i++) {
+                keyPress("ENTER", 15);
+                sleep(20);
+            }
+
+            sleep(750);
+        }
+
+        // Open planing screen
+        keyPress("E", 15);
+        sleep(6000);
+    }
+
+    public static void startMission() {
+        // Confirm mission settings
+        keyPress("UP", 10);
+        sleep(50);
+
+        keyPress("ENTER", 10);
+        sleep(450);
+
+        // Start mission
+        keyPress("UP", 10);
+        sleep(50);
+
+        keyPress("ENTER", 10);
+        sleep(750);
+
+        keyPress("ENTER", 15);
+        sleep(12_500L);
     }
 
 }

@@ -11,8 +11,6 @@ public class AutoShoot extends Tool {
 
     private static final int TARGET_COLOR = -4108465;
 
-
-
     private boolean enabled;
 
     public AutoShoot(Logger logger) {
@@ -29,16 +27,29 @@ public class AutoShoot extends Tool {
         if(this.enabled) {
             final int x = screenWidth() / 2, y = screenHeight() / 2;
 
+            final Object shootLock = new Object();
+
             new Thread(() -> {
                 while (this.enabled) {
                     if (SystemUtil.getScreenPixelColor(x, y).getRGB() == TARGET_COLOR) {
-                        SystemUtil.mouseClick("LEFT", 10);
-                        SystemUtil.sleep(10);
+                        synchronized (shootLock) {
+                            shootLock.notify();
+                        }
                     }
-
-                    SystemUtil.sleep(8);
                 }
             }).start();
+
+            while (this.enabled) {
+                synchronized (shootLock) {
+                    try {
+                        shootLock.wait();
+
+                        SystemUtil.mouseClick("LEFT", 10);
+                        SystemUtil.sleep(15);
+                    } catch (InterruptedException ignore) {
+                    }
+                }
+            }
         }
     }
 

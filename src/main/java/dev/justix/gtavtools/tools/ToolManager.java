@@ -2,13 +2,16 @@ package dev.justix.gtavtools.tools;
 
 import dev.justix.gtavtools.logging.Level;
 import dev.justix.gtavtools.logging.Logger;
+import dev.justix.gtavtools.tools.casino.Drill;
+import dev.justix.gtavtools.tools.casino.KeypadHack;
+import dev.justix.gtavtools.tools.cayoperico.*;
 import dev.justix.gtavtools.tools.combat.AutoShoot;
 import dev.justix.gtavtools.tools.lobby.SoloLobby;
 import dev.justix.gtavtools.tools.lobby.SwitchInviteLobby;
 import dev.justix.gtavtools.tools.lobby.SwitchPublicLobby;
 import dev.justix.gtavtools.tools.misc.CallMechanic;
 import dev.justix.gtavtools.tools.misc.RepairAllVehicles;
-import dev.justix.gtavtools.tools.mission.*;
+import dev.justix.gtavtools.tools.mission.ReplayGlitch;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -26,15 +29,23 @@ public class ToolManager {
         this.activeTools = new HashMap<>();
         this.lastId = 0;
 
-        // Mission
-        new ReplayGlitch(logger);
+        // Cayo Perico Heist
         new CollectLoot(logger);
         new DrainageGrate(logger);
-        new FingerprintHack(logger);
+        new dev.justix.gtavtools.tools.cayoperico.FingerprintHack(logger);
         new PlasmaCutter(logger);
-        new VaultCode(logger);
         new SignalBoxHack(logger);
-        new StartCayoPerico(logger);
+        new dev.justix.gtavtools.tools.cayoperico.StartMission(logger);
+        new VaultCode(logger);
+
+        // Diamond Casino Heist
+        new Drill(logger);
+        new dev.justix.gtavtools.tools.casino.FingerprintHack(logger);
+        new KeypadHack(logger);
+        new dev.justix.gtavtools.tools.casino.StartMission(logger);
+
+        // Mission
+        new ReplayGlitch(logger);
 
         // Combat
         new AutoShoot(logger);

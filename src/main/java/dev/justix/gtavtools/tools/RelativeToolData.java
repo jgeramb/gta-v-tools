@@ -19,6 +19,10 @@ public class RelativeToolData {
         this.add(resolution, key, new Rectangle(x, y, width, height));
     }
 
+    public void addPoint(String resolution, String key, int x, int y) {
+        this.add(resolution, key, new Point(x, y));
+    }
+
     public Object get(String key) {
         return this.data.get(SystemUtil.RESOLUTION).get(key);
     }
@@ -33,6 +37,10 @@ public class RelativeToolData {
 
     public Rectangle getRect(String key) {
         return (Rectangle) get(key);
+    }
+
+    public Point getPoint(String key) {
+        return (Point) get(key);
     }
 
 }

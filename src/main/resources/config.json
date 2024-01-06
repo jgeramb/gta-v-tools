@@ -1,6 +1,7 @@
 {
   "debugImageDirectory": "F:\\pictures\\screenshots",
   "networkInterfaceName": "Intel - 1 Gbit",
+  "networkAdapterName": "Intel(R) Ethernet Connection (7) I219-V",
   "contactIndices": {
     "Mechanic": 2,
     "Mors Mutual Insurance": 3

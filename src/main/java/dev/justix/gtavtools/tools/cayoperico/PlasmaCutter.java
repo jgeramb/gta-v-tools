@@ -1,17 +1,19 @@
-package dev.justix.gtavtools.tools.mission;
+package dev.justix.gtavtools.tools.cayoperico;
 
 import dev.justix.gtavtools.logging.Level;
 import dev.justix.gtavtools.logging.Logger;
 import dev.justix.gtavtools.tools.Category;
 import dev.justix.gtavtools.tools.Tool;
-import dev.justix.gtavtools.util.SystemUtil;
+
+import static dev.justix.gtavtools.util.SystemUtil.keyPress;
+import static dev.justix.gtavtools.util.SystemUtil.sleep;
 
 public class PlasmaCutter extends Tool {
 
     private boolean cancel;
 
     public PlasmaCutter(Logger logger) {
-        super(logger, Category.MISSION, "Plasma Cutter");
+        super(logger, Category.CAYO_PERICO, "Plasma Cutter");
 
         this.cancel = false;
     }
@@ -23,8 +25,8 @@ public class PlasmaCutter extends Tool {
         for (int i = 0; i < 5; i++) {
             if (this.cancel) return;
 
-            SystemUtil.keyPress("PAGE_UP", 1975);
-            SystemUtil.sleep(3150);
+            keyPress("PAGE_UP", 1975);
+            sleep(3150);
         }
 
         logger.log(Level.INFO, "Glass cut successfully");

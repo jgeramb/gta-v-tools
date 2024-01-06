@@ -1,4 +1,4 @@
-package dev.justix.gtavtools.tools.mission;
+package dev.justix.gtavtools.tools.cayoperico;
 
 import dev.justix.gtavtools.logging.Level;
 import dev.justix.gtavtools.logging.Logger;
@@ -13,7 +13,7 @@ public class VaultCode extends Tool {
     private int[] vaultCode;
 
     public VaultCode(Logger logger) {
-        super(logger, Category.MISSION, "Vault Code");
+        super(logger, Category.CAYO_PERICO, "Vault Code");
 
         this.relativeData.addRect("1920x1200", "code", 181, 917, 81, 22);
 

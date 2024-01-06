@@ -1,4 +1,4 @@
-package dev.justix.gtavtools.tools.mission;
+package dev.justix.gtavtools.tools.cayoperico;
 
 import dev.justix.gtavtools.logging.Level;
 import dev.justix.gtavtools.logging.Logger;
@@ -12,7 +12,7 @@ public class DrainageGrate extends Tool {
     private boolean cancel;
 
     public DrainageGrate(Logger logger) {
-        super(logger, Category.MISSION, "Drainage Grate");
+        super(logger, Category.CAYO_PERICO, "Drainage Grate");
 
         this.cancel = false;
     }
