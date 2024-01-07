@@ -23,9 +23,9 @@ import java.util.function.Function;
 public class GUI extends JFrame {
 
     private static final int
-            ALPHA = 250,
+            ALPHA = 245,
             WIDTH = 220,
-            HEADER_HEIGHT = 60,
+            HEADER_HEIGHT = 64,
             COMPONENT_HEIGHT = 32,
             INSET = 16,
             COMPONENT_INSET = 12;

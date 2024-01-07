@@ -7,6 +7,8 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum Category {
 
+    CAYO_PERICO("Cayo Perico"),
+    CASINO("Casino"),
     MISSION("Missions"),
     COMBAT("Combat"),
     LOBBY("Lobby"),

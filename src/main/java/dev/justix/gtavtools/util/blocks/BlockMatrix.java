@@ -20,7 +20,17 @@ public class BlockMatrix {
     }
 
     public double compare(BlockMatrix other) {
-        return ImageUtil.getMaxMatchPercentage(other.getPixels(), this.pixels, 100f, 1, 1, true);
+        return ImageUtil.getMaxMatchPercentage(this.pixels, other.getPixels(), 100f, 1, 1);
+    }
+
+    public double compare(BlockMatrix other, float maxRequiredMaxPercentage, int minXOffset, int maxXOffset, int minYOffset, int maxYOffset, boolean checkImage2WhitePixelsOnly) {
+        return ImageUtil.getMaxMatchPercentage(
+                this.pixels, other.getPixels(),
+                maxRequiredMaxPercentage,
+                minXOffset, maxXOffset,
+                minYOffset, maxYOffset,
+                checkImage2WhitePixelsOnly
+        );
     }
 
 }

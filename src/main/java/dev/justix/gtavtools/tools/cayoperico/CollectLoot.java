@@ -1,4 +1,4 @@
-package dev.justix.gtavtools.tools.mission;
+package dev.justix.gtavtools.tools.cayoperico;
 
 import dev.justix.gtavtools.logging.Level;
 import dev.justix.gtavtools.logging.Logger;
@@ -11,7 +11,7 @@ public class CollectLoot extends Tool {
     private boolean collecting;
 
     public CollectLoot(Logger logger) {
-        super(logger, Category.MISSION, "Collect Loot");
+        super(logger, Category.CAYO_PERICO, "Collect Loot");
 
         this.collecting = false;
     }

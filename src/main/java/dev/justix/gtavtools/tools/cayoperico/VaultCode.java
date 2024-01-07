@@ -1,4 +1,4 @@
-package dev.justix.gtavtools.tools.mission;
+package dev.justix.gtavtools.tools.cayoperico;
 
 import dev.justix.gtavtools.logging.Level;
 import dev.justix.gtavtools.logging.Logger;
@@ -13,11 +13,11 @@ public class VaultCode extends Tool {
     private int[] vaultCode;
 
     public VaultCode(Logger logger) {
-        super(logger, Category.MISSION, "Vault Code");
+        super(logger, Category.CAYO_PERICO, "Vault Code");
 
-        this.relativeData.addRect("1920x1200", "code", 181, 917, 81, 22);
+        relativeData.addRect("1920x1200", "code", 181, 917, 81, 22);
 
-        this.relativeData.addRect("1920x1080", "code", 168, 822, 73, 20);
+        relativeData.addRect("1920x1080", "code", 168, 822, 73, 20);
 
         this.cancel = false;
         this.vaultCode = null;
@@ -26,7 +26,7 @@ public class VaultCode extends Tool {
     @Override
     public void execute() {
         if (this.vaultCode == null) {
-            String ocr = OCRUtil.ocr(SystemUtil.screenshot(this.relativeData.getRect("code")), false);
+            String ocr = OCRUtil.ocr(SystemUtil.screenshot(relativeData.getRect("code")), false);
 
             if (ocr.length() > "00-00-00".length())
                 ocr = ocr.substring(0, "00-00-00".length());

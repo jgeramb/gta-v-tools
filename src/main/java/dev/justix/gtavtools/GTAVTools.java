@@ -47,7 +47,7 @@ public class GTAVTools {
                 int rawKeyCode = nativeEvent.getRawCode();
                 String keyName = SystemUtil.getKeyName(rawKeyCode);
 
-                if (ctrlPressed.get() && keyName.equals("PAUSE")) {
+                if (ctrlPressed.get() && keyName.equals("SCROLL_LOCK")) {
                     Thread.currentThread().setName("Application");
                     logger.log(Level.INFO, "Shutting down application...");
 

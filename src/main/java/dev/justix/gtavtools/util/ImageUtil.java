@@ -55,7 +55,7 @@ public class ImageUtil {
         return transform(image, 0, 0, image.getWidth(), image.getHeight(), binary);
     }
 
-    public static BufferedImage transform(BufferedImage image,Rectangle rectangle, boolean binary) {
+    public static BufferedImage transform(BufferedImage image, Rectangle rectangle, boolean binary) {
         return transform(image, rectangle.x, rectangle.y, rectangle.width, rectangle.height, binary);
     }
 
@@ -85,7 +85,10 @@ public class ImageUtil {
         resizedImageGraphics.drawImage(
                 image,
                 0, 0, width, height,
-                Math.max(x, 0), Math.max(y, 0), x + Math.min(image.getWidth() - x, width), y + Math.min(image.getHeight() - y, height),
+                Math.max(x, 0),
+                Math.max(y, 0),
+                x + Math.min(image.getWidth() - x, width),
+                y + Math.min(image.getHeight() - y, height),
                 null
         );
         resizedImageGraphics.dispose();
@@ -94,6 +97,14 @@ public class ImageUtil {
     }
 
     public static int[][] getPixels(BufferedImage image) {
+        return getPixels(image, 0, 255, 0, 255, 0, 255, true);
+    }
+
+    public static int[][] getPixels(BufferedImage image,
+                                    int minRed, int maxRed,
+                                    int minGreen, int maxGreen,
+                                    int minBlue, int maxBlue,
+                                    boolean isBinary) {
         final int width = image.getWidth(), height = image.getHeight();
         final int[][] pixels = new int[height][width];
         final Raster raster = image.getData();
@@ -105,23 +116,57 @@ public class ImageUtil {
             for (int x = 0; x < width; x++) {
                 raster.getPixel(x, y, pixel);
 
-                row[x] = pixel[0];
+                if(isBinary)
+                    row[x] = pixel[0];
+                else {
+                    boolean red = pixel[0] >= minRed && pixel[0] <= maxRed,
+                            green = pixel[1] >= minGreen && pixel[1] <= maxGreen,
+                            blue = pixel[2] >= minBlue && pixel[2] <= maxBlue;
+
+                    row[x] = (red && green && blue) ? 1 : 0;
+                }
             }
         }
 
         return pixels;
     }
 
-    public static double getMaxMatchPercentage(BufferedImage image1, BufferedImage image2, float maxRequiredPercentage, int maxXOffset, int maxYOffset) {
-        return getMaxMatchPercentage(getPixels(image1), getPixels(image2), maxRequiredPercentage, maxXOffset, maxYOffset, true);
+    public static double getMaxMatchPercentage(BufferedImage image1, BufferedImage image2,
+                                               float maxRequiredPercentage,
+                                               int maxXOffset, int maxYOffset) {
+        return getMaxMatchPercentage(
+                getPixels(image1), getPixels(image2),
+                maxRequiredPercentage,
+                maxXOffset,
+                maxYOffset
+        );
     }
 
-    public static double getMaxMatchPercentage(int[][] image1Pixels, int[][] image2Pixels, float maxRequiredPercentage, int maxXOffset, int maxYOffset, boolean checkBlack) {
+    public static double getMaxMatchPercentage(int[][] image1Pixels, int[][] image2Pixels,
+                                               float maxRequiredPercentage,
+                                               int maxXOffset, int maxYOffset) {
+        return getMaxMatchPercentage(
+                image1Pixels, image2Pixels,
+                maxRequiredPercentage,
+                -maxXOffset, maxXOffset,
+                -maxYOffset, maxYOffset,
+                false
+        );
+    }
+
+    public static double getMaxMatchPercentage(int[][] image1Pixels, int[][] image2Pixels,
+                                               float maxRequiredPercentage,
+                                               int minXOffset, int maxXOffset,
+                                               int minYOffset, int maxYOffset,
+                                               boolean checkImage2WhitePixelsOnly) {
         final AtomicReference<Double> matchPercentage = new AtomicReference<>(0.0);
-        final CountDownLatch latch = new CountDownLatch(Math.max(1, maxXOffset * 2 + 1) * Math.max(1, maxYOffset * 2 + 1));
+        final CountDownLatch latch = new CountDownLatch(
+                (Math.abs(maxXOffset - minXOffset) + 1)
+                        * (Math.abs(maxYOffset - minYOffset) + 1)
+        );
 
         try (ExecutorService executor = Executors.newFixedThreadPool(16)) {
-            int xOffset = -maxXOffset, yOffset = -maxYOffset;
+            int xOffset = minXOffset, yOffset = minYOffset;
 
             do {
                 int finalXOffset = xOffset, finalYOffset = yOffset;
@@ -131,7 +176,7 @@ public class ImageUtil {
                         if (matchPercentage.get() >= (maxRequiredPercentage / 100.0))
                             return;
 
-                        double currentMatchPercentage = compare(image1Pixels, image2Pixels, finalXOffset, finalYOffset, checkBlack);
+                        double currentMatchPercentage = compare(image1Pixels, image2Pixels, finalXOffset, finalYOffset, checkImage2WhitePixelsOnly);
 
                         if (currentMatchPercentage > matchPercentage.get())
                             matchPercentage.set(currentMatchPercentage);
@@ -141,7 +186,7 @@ public class ImageUtil {
                 });
 
                 if (++xOffset > maxXOffset) {
-                    xOffset = -maxXOffset;
+                    xOffset = minXOffset;
                     yOffset++;
                 }
             } while (yOffset <= maxYOffset);
@@ -155,24 +200,24 @@ public class ImageUtil {
         return matchPercentage.get();
     }
 
-    public static double compare(int[][] image1Colors, int[][] image2Colors, int xOffset, int yOffset, boolean checkBlack) {
+    public static double compare(int[][] image1Colors, int[][] image2Colors, int xOffset, int yOffset, boolean checkImage2WhitePixelsOnly) {
         final int image1Height = image1Colors.length, image1Width = image1Colors[0].length;
         final int image2Height = image2Colors.length, image2Width = image2Colors[0].length;
         int checked = 0, matches = 0;
 
-        if (image2Height - yOffset <= 0 || image2Width - xOffset <= 0)
+        if (image2Width - Math.abs(xOffset) <= 0 || image2Height - Math.abs(yOffset) <= 0)
             return 0d;
 
-        for (int y = Math.max(-yOffset, 0); y < Math.min(image1Height, Math.min(image2Height, image2Height - yOffset)); y++) {
+        for (int y = Math.max(-yOffset, 0); y < Math.min(image1Height, image2Height - yOffset); y++) {
             final int[] yColors1 = image1Colors[y], yColors2 = image2Colors[y + yOffset];
 
-            for (int x = Math.max(-xOffset, 0); x < Math.min(image1Width, Math.min(image2Width, image2Width - xOffset)); x++) {
-                final int pixelColor = yColors1[x];
+            for (int x = Math.max(-xOffset, 0); x < Math.min(image1Width, image2Width - xOffset); x++) {
+                int image2Color = yColors2[x + xOffset];
 
-                if (!checkBlack && pixelColor == 0)
+                if (checkImage2WhitePixelsOnly && image2Color != 1)
                     continue;
 
-                if (pixelColor == yColors2[x + xOffset])
+                if (yColors1[x] == image2Color)
                     matches++;
 
                 checked++;
@@ -180,6 +225,25 @@ public class ImageUtil {
         }
 
         return (double) matches / checked;
+    }
+
+    public static boolean isFilled(BufferedImage image, int x, int y, int radius) {
+        int filled = 0, empty = 0;
+
+        for (int xOffset = Math.max(-radius, -x); xOffset < Math.min(radius, image.getWidth() - x); xOffset++) {
+            final int currentX = x + xOffset;
+
+            for (int yOffset = Math.max(-radius, -y); yOffset < Math.min(radius, image.getHeight() - y); yOffset++) {
+                final int currentY = y + yOffset;
+
+                if (image.getRGB(currentX, currentY) == Color.white.getRGB())
+                    filled++;
+                else
+                    empty++;
+            }
+        }
+
+        return filled > empty;
     }
 
 }
