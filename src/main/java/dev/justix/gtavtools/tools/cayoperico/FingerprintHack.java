@@ -24,20 +24,20 @@ public class FingerprintHack extends Tool {
     public FingerprintHack(Logger logger) {
         super(logger, Category.CAYO_PERICO, "Fingerprint Hack");
 
-        this.relativeData.addRect("1920x1200", "components_text", 512, 334, 26, 18);
-        this.relativeData.add("1920x1200", "part_height", 66);
-        this.relativeData.addRect("1920x1200", "expected", 1040, 384, 448, 680);
-        this.relativeData.addRect("1920x1200", "expected_resized", 0, 0, 410, 618);
-        this.relativeData.add("1920x1200", "expected_y_offset", 9);
-        this.relativeData.addRect("1920x1200", "current", 366, 397, 410, 662);
-        this.relativeData.add("1920x1200", "current_y_step", 84.5d);
+        relativeData.addRect("1920x1200", "components_text", 512, 334, 26, 18);
+        relativeData.add("1920x1200", "part_height", 66);
+        relativeData.addRect("1920x1200", "expected", 1040, 384, 448, 680);
+        relativeData.addRect("1920x1200", "expected_resized", 0, 0, 410, 618);
+        relativeData.add("1920x1200", "expected_y_offset", 9);
+        relativeData.addRect("1920x1200", "current", 366, 397, 410, 662);
+        relativeData.add("1920x1200", "current_y_step", 84.5d);
 
-        this.relativeData.add("1920x1080", "part_height", 61);
-        this.relativeData.addRect("1920x1080", "expected", 1032, 348, 406, 602);
-        this.relativeData.addRect("1920x1080", "expected_resized", 0, 0, 366, 550);
-        this.relativeData.add("1920x1080", "expected_y_offset", 3);
-        this.relativeData.addRect("1920x1080", "current", 428, 358, 366, 592);
-        this.relativeData.add("1920x1080", "current_y_step", 75d);
+        relativeData.add("1920x1080", "part_height", 61);
+        relativeData.addRect("1920x1080", "expected", 1032, 348, 406, 602);
+        relativeData.addRect("1920x1080", "expected_resized", 0, 0, 366, 550);
+        relativeData.add("1920x1080", "expected_y_offset", 3);
+        relativeData.addRect("1920x1080", "current", 428, 358, 366, 592);
+        relativeData.add("1920x1080", "current_y_step", 75d);
 
         this.cancel = false;
     }
@@ -55,10 +55,10 @@ public class FingerprintHack extends Tool {
             BufferedImage screen = screenshot(0, 0, screenWidth(), screenHeight());
 
             // expected fingerprint
-            BufferedImage expectedCapture = crop(screen, this.relativeData.getRect("expected"));
+            BufferedImage expectedCapture = crop(screen, relativeData.getRect("expected"));
             new RescaleOp(12f, -24, null).filter(expectedCapture, expectedCapture);
 
-            final BufferedImage expected = transform(expectedCapture, this.relativeData.getRect("expected_resized"), true);
+            final BufferedImage expected = transform(expectedCapture, relativeData.getRect("expected_resized"), true);
             final double expectedYStep = expected.getHeight() / 8d;
             final int blockSize = BlockMatrixConverter.getBlockSize(getPixels(expected));
             final Rectangle bounds = BlockMatrixConverter.getLastBounds();
@@ -71,8 +71,8 @@ public class FingerprintHack extends Tool {
                 int finalCurrentElement = currentElement;
 
                 new Thread(() -> {
-                    final int currentY = (int) (finalCurrentElement * expectedYStep) + (bounds.y - this.relativeData.getNumber("expected_y_offset"));
-                    BufferedImage partCapture = crop(expected, bounds.x, currentY, bounds.width, this.relativeData.getNumber("part_height"));
+                    final int currentY = (int) (finalCurrentElement * expectedYStep) + (bounds.y - relativeData.getNumber("expected_y_offset"));
+                    BufferedImage partCapture = crop(expected, bounds.x, currentY, bounds.width, relativeData.getNumber("part_height"));
                     BlockMatrix part = BlockMatrixConverter.convertBufferedImage(partCapture, blockSize);
 
                     debug(finalCurrentElement + "_expected", part.getPixels());
@@ -83,7 +83,7 @@ public class FingerprintHack extends Tool {
             }
 
             // current fingerprint parts
-            BufferedImage currentPartsCapture = crop(screen, this.relativeData.getRect("current"));
+            BufferedImage currentPartsCapture = crop(screen, relativeData.getRect("current"));
             new RescaleOp(16f, -72, null).filter(currentPartsCapture, currentPartsCapture);
 
             final BufferedImage currentPartsImage = transform(currentPartsCapture, true);
@@ -97,9 +97,9 @@ public class FingerprintHack extends Tool {
 
                 new Thread(() -> {
                     // crop fingerprint to scan to current part
-                    final int currentY = (int) (finalCurrentElement * this.relativeData.getDecimal("current_y_step"));
+                    final int currentY = (int) (finalCurrentElement * relativeData.getDecimal("current_y_step"));
 
-                    BufferedImage partCapture = crop(currentPartsImage, bounds.x, currentY, bounds.width, this.relativeData.getNumber("part_height"));
+                    BufferedImage partCapture = crop(currentPartsImage, bounds.x, currentY, bounds.width, relativeData.getNumber("part_height"));
                     BlockMatrix part = BlockMatrixConverter.convertBufferedImage(partCapture, blockSize);
 
                     debug(String.valueOf(finalCurrentElement), part.getPixels());
@@ -192,7 +192,7 @@ public class FingerprintHack extends Tool {
 
             sleep(4_350);
 
-            BufferedImage textCapture = screenshot(this.relativeData.getRect("components_text"));
+            BufferedImage textCapture = screenshot(relativeData.getRect("components_text"));
             new RescaleOp(2.5f, -8, null).filter(textCapture, textCapture);
 
             componentsTextCapture = transform(textCapture, true);

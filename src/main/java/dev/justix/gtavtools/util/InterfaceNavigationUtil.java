@@ -98,7 +98,7 @@ public class InterfaceNavigationUtil {
         sleep(750);
 
         keyPress("ENTER", 15);
-        sleep(12_500L);
+        sleep(14_500L);
     }
 
 }

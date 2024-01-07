@@ -37,32 +37,53 @@ public class StartMission extends Tool {
 
             // Set mission settings
 
-            boolean silentAndSneaky = booleanValue("Silent & Sneaky", true),
-                    theBigCon = booleanValue("The Big Con", false);
+            boolean silentAndSneaky = booleanValue("Silent & Sneaky"),
+                    theBigCon = booleanValue("The Big Con");
 
-            // Entry point
             keyPress("ENTER", 10);
             sleep(75);
 
-            if(silentAndSneaky) {
-                /* Staff lobby */
+            if(silentAndSneaky || !theBigCon) {
+                // Entry point
+                if (silentAndSneaky) {
+                    /* Staff lobby */
+                    keyPress("RIGHT", 10);
+                    sleep(15);
+                } else {
+                    /* Sewers */
+                    for (int i = 0; i < 2; i++) {
+                        keyPress("LEFT", 10);
+                        sleep(15);
+                    }
+                }
+            } else {
+                // Entry Outfit
+
+                /* Gruppe Sechs */
                 keyPress("RIGHT", 10);
                 sleep(15);
-            } else if(booleanValue("The Big Con", false)) {
-                /* Security tunnel */
-                for (int i = 0; i < 4; i++) {
-                    keyPress("LEFT", 10);
-                    sleep(15);
-                }
-            } else if(booleanValue("Aggressive", false)) {
-                /* Sewers */
-                for (int i = 0; i < 2; i++) {
-                    keyPress("LEFT", 10);
-                    sleep(15);
-                }
             }
 
             goToNextOption();
+
+            if(theBigCon) {
+                // Leave Outfit
+                keyPress("ENTER", 10);
+                sleep(75);
+
+                /* NOOSE */
+                keyPress("RIGHT", 10);
+                sleep(15);
+
+                keyPress("ENTER", 10);
+                sleep(75);
+
+                keyPress("LEFT", 10);
+                sleep(15);
+
+                keyPress("ENTER", 10);
+                sleep(75);
+            }
 
             // Exit point
 
@@ -89,7 +110,7 @@ public class StartMission extends Tool {
 
             // Navigate to cut definition
             keyPress("RIGHT", 10);
-            sleep(15);
+            sleep(75);
 
             keyPress("UP", 10);
             sleep(15);
@@ -100,10 +121,8 @@ public class StartMission extends Tool {
             keyPress("DOWN", 10);
             sleep(15);
 
-            for (int i = 0; i < 2; i++) {
-                keyPress("ENTER", 10);
-                sleep(500);
-            }
+            keyPress("ENTER", 10);
+            sleep(500);
 
             this.waitingForCutDefinition = false;
         }

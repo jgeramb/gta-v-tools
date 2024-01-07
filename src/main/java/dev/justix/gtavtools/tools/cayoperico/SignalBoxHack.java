@@ -21,27 +21,27 @@ public class SignalBoxHack extends Tool {
     public SignalBoxHack(Logger logger) {
         super(logger, Category.CAYO_PERICO, "Signal Box Hack");
 
-        this.relativeData.addRect("1920x1200", "result", 834, 132, 246, 90);
-        this.relativeData.addRect("1920x1200", "result_number1", 0, 0, 45, 90);
-        this.relativeData.addRect("1920x1200", "result_number2", 101, 0, 45, 90);
-        this.relativeData.addRect("1920x1200", "result_number3", 201, 0, 45, 90);
-        this.relativeData.addRect("1920x1200", "number1", 441, 297, 45, 90);
-        this.relativeData.addRect("1920x1200", "number2", 441, 559, 45, 90);
-        this.relativeData.addRect("1920x1200", "number3", 441, 819, 45, 90);
-        this.relativeData.addRect("1920x1200", "factor1", 1390, 301, 78, 78);
-        this.relativeData.addRect("1920x1200", "factor2", 1390, 562, 78, 78);
-        this.relativeData.addRect("1920x1200", "factor3", 1390, 823, 78, 78);
+        relativeData.addRect("1920x1200", "result", 834, 132, 246, 90);
+        relativeData.addRect("1920x1200", "result_number1", 0, 0, 45, 90);
+        relativeData.addRect("1920x1200", "result_number2", 101, 0, 45, 90);
+        relativeData.addRect("1920x1200", "result_number3", 201, 0, 45, 90);
+        relativeData.addRect("1920x1200", "number1", 441, 297, 45, 90);
+        relativeData.addRect("1920x1200", "number2", 441, 559, 45, 90);
+        relativeData.addRect("1920x1200", "number3", 441, 819, 45, 90);
+        relativeData.addRect("1920x1200", "factor1", 1390, 301, 78, 78);
+        relativeData.addRect("1920x1200", "factor2", 1390, 562, 78, 78);
+        relativeData.addRect("1920x1200", "factor3", 1390, 823, 78, 78);
 
-        this.relativeData.addRect("1920x1080", "result", 847, 120, 220, 80);
-        this.relativeData.addRect("1920x1080", "result_number1", 0, 0, 40, 80);
-        this.relativeData.addRect("1920x1080", "result_number2", 90, 0, 40, 80);
-        this.relativeData.addRect("1920x1080", "result_number3", 180, 0, 40, 80);
-        this.relativeData.addRect("1920x1080", "number1", 492, 267, 40, 80);
-        this.relativeData.addRect("1920x1080", "number2", 492, 503, 40, 80);
-        this.relativeData.addRect("1920x1080", "number3", 492, 737, 40, 80);
-        this.relativeData.addRect("1920x1080", "factor1", 1346, 271, 73, 73);
-        this.relativeData.addRect("1920x1080", "factor2", 1346, 506, 73, 73);
-        this.relativeData.addRect("1920x1080", "factor3", 1346, 741, 73, 73);
+        relativeData.addRect("1920x1080", "result", 847, 120, 220, 80);
+        relativeData.addRect("1920x1080", "result_number1", 0, 0, 40, 80);
+        relativeData.addRect("1920x1080", "result_number2", 90, 0, 40, 80);
+        relativeData.addRect("1920x1080", "result_number3", 180, 0, 40, 80);
+        relativeData.addRect("1920x1080", "number1", 492, 267, 40, 80);
+        relativeData.addRect("1920x1080", "number2", 492, 503, 40, 80);
+        relativeData.addRect("1920x1080", "number3", 492, 737, 40, 80);
+        relativeData.addRect("1920x1080", "factor1", 1346, 271, 73, 73);
+        relativeData.addRect("1920x1080", "factor2", 1346, 506, 73, 73);
+        relativeData.addRect("1920x1080", "factor3", 1346, 741, 73, 73);
 
         BufferedImage factor1Image = null, factor2Image = null, factor10Image = null;
 
@@ -59,17 +59,17 @@ public class SignalBoxHack extends Tool {
 
     @Override
     public void execute() {
-        BufferedImage resultImage = screenshot(this.relativeData.getRect("result"));
-        int result = fromDigital(crop(resultImage, this.relativeData.getRect("result_number1"))) * 100
-                + fromDigital(crop(resultImage, this.relativeData.getRect("result_number2"))) * 10
-                + fromDigital(crop(resultImage, this.relativeData.getRect("result_number3"))),
-                number1 = fromDigital(screenshot(this.relativeData.getRect("number1"))),
-                number2 = fromDigital(screenshot(this.relativeData.getRect("number2"))),
-                number3 = fromDigital(screenshot(this.relativeData.getRect("number3")));
+        BufferedImage resultImage = screenshot(relativeData.getRect("result"));
+        int result = fromDigital(crop(resultImage, relativeData.getRect("result_number1"))) * 100
+                + fromDigital(crop(resultImage, relativeData.getRect("result_number2"))) * 10
+                + fromDigital(crop(resultImage, relativeData.getRect("result_number3"))),
+                number1 = fromDigital(screenshot(relativeData.getRect("number1"))),
+                number2 = fromDigital(screenshot(relativeData.getRect("number2"))),
+                number3 = fromDigital(screenshot(relativeData.getRect("number3")));
         int[] factors = new int[] {
-                getFactor(screenshot(this.relativeData.getRect("factor1"))),
-                getFactor(screenshot(this.relativeData.getRect("factor2"))),
-                getFactor(screenshot(this.relativeData.getRect("factor3")))
+                getFactor(screenshot(relativeData.getRect("factor1"))),
+                getFactor(screenshot(relativeData.getRect("factor2"))),
+                getFactor(screenshot(relativeData.getRect("factor3")))
         };
 
         logger.log(Level.INFO, "Calculating...");

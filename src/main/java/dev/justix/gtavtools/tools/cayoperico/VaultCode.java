@@ -15,9 +15,9 @@ public class VaultCode extends Tool {
     public VaultCode(Logger logger) {
         super(logger, Category.CAYO_PERICO, "Vault Code");
 
-        this.relativeData.addRect("1920x1200", "code", 181, 917, 81, 22);
+        relativeData.addRect("1920x1200", "code", 181, 917, 81, 22);
 
-        this.relativeData.addRect("1920x1080", "code", 168, 822, 73, 20);
+        relativeData.addRect("1920x1080", "code", 168, 822, 73, 20);
 
         this.cancel = false;
         this.vaultCode = null;
@@ -26,7 +26,7 @@ public class VaultCode extends Tool {
     @Override
     public void execute() {
         if (this.vaultCode == null) {
-            String ocr = OCRUtil.ocr(SystemUtil.screenshot(this.relativeData.getRect("code")), false);
+            String ocr = OCRUtil.ocr(SystemUtil.screenshot(relativeData.getRect("code")), false);
 
             if (ocr.length() > "00-00-00".length())
                 ocr = ocr.substring(0, "00-00-00".length());

@@ -20,7 +20,7 @@ public class Drill extends Tool {
 
     @Override
     public void execute() {
-        sleep(350);
+        sleep(250);
 
         logger.log(Level.INFO, "Drilling through vault door...");
 

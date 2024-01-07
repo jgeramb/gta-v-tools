@@ -1,10 +1,12 @@
 package dev.justix.gtavtools.tools.mission;
 
 import dev.justix.gtavtools.config.ApplicationConfig;
+import dev.justix.gtavtools.gui.components.settings.BooleanSetting;
 import dev.justix.gtavtools.logging.Level;
 import dev.justix.gtavtools.logging.Logger;
 import dev.justix.gtavtools.tools.Category;
 import dev.justix.gtavtools.tools.Tool;
+import dev.justix.gtavtools.util.DNSUtil;
 import dev.justix.gtavtools.util.InterfaceNavigationUtil;
 import org.pcap4j.core.BpfProgram;
 import org.pcap4j.core.PcapHandle;
@@ -19,6 +21,7 @@ import java.net.InetAddress;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -32,12 +35,25 @@ public class ReplayGlitch extends Tool {
 
     public ReplayGlitch(Logger logger) {
         super(logger, Category.MISSION, "Replay Glitch");
+
+        addSetting(new BooleanSetting(this, "Casino", false));
     }
 
     @Override
     public void execute() {
         this.cancel = false;
 
+        // Determine telemetry servers
+        final List<String> cnameRecords = DNSUtil.getCNAMERecords("prod.telemetry.ros.rockstargames.com");
+
+        if(cnameRecords.isEmpty()) {
+            this.logger.log(Level.SEVERE, "CNAME record not found");
+            return;
+        }
+
+        final List<String> telemetryServers = DNSUtil.getARecords(cnameRecords.get(0));
+
+        // Watch network traffic
         try {
             final String adapterName = (String) ApplicationConfig.CONFIG.get("networkAdapterName");
             final PcapNetworkInterface device = Pcaps.findAllDevs()
@@ -54,6 +70,10 @@ public class ReplayGlitch extends Tool {
             logger.log(Level.INFO, "Waiting for telemetry request...");
 
             final AtomicBoolean networkDisabled = new AtomicBoolean(false);
+            final Object networkLock = new Object();
+
+            int telemetryPacketCount = 0;
+            boolean connectionOpened = false;
 
             AtomicBoolean packetSent = new AtomicBoolean(false),
                     packedReceived = new AtomicBoolean(false);
@@ -76,20 +96,21 @@ public class ReplayGlitch extends Tool {
                             if(packetSent.get()) continue;
 
                             if(tcpPacket.getPayload() == null) {
-                                if(!DEBUG && !networkDisabled.get() && tcpPacket.getHeader().getSyn() && !tcpPacket.getHeader().getAck()) {
+                                if(!networkDisabled.get() && tcpPacket.getHeader().getSyn() && !tcpPacket.getHeader().getAck()) {
                                     final IpV4Packet ipV4Packet = packet.get(IpV4Packet.class);
                                     final InetAddress destAddress = ipV4Packet.getHeader().getDstAddr();
 
-                                    switch (destAddress.getHostAddress()) {
-                                        case "52.11.176.135":
-                                        case "44.240.168.228":
-                                        case "44.230.77.120":
-                                        case "44.225.126.190":
-                                            break;
-                                        default:
-                                            if(!destAddress.getHostName().endsWith(".compute.amazonaws.com"))
-                                                continue;
-                                    }
+                                    // Check if destination address is a telemetry server
+                                    if(!telemetryServers.contains(destAddress.getHostAddress()))
+                                        continue;
+
+                                    if((++telemetryPacketCount) < 2 && booleanValue("Casino"))
+                                        continue;
+
+                                    connectionOpened = true;
+
+                                    if(DEBUG)
+                                        continue;
 
                                     new Thread(() -> {
                                         Thread.currentThread().setName("HTTP Packet Thread");
@@ -103,12 +124,55 @@ public class ReplayGlitch extends Tool {
 
                                         setNetworkAdapterEnabled(false);
 
-                                        logger.log(Level.INFO, "Network adapter disabled at " + TIME_FORMAT.format(new Date()));
+                                        synchronized (networkLock) {
+                                            networkLock.notify();
+                                        }
+
+                                        sleep(16750L);
+                                        keyPress("ENTER", 50L);
+
+                                        // Reconnect network
+                                        sleep(5000L);
+
+                                        setNetworkAdapterEnabled(true);
+
+                                        sleep(15000L);
+
+                                        // Open Social Club
+                                        keyPress("HOME", 50L);
+                                        sleep(1250L);
+
+                                        // Reconnect and close pop-up
+                                        robot().mouseMove(1210, 334);
+                                        sleep(150L);
+                                        mouseClick("LEFT", 100L);
+
+                                        sleep(4000L);
+
+                                        // Close pop-up
+                                        keyPress("ESCAPE", 50L);
+                                        sleep(3500L);
+
+                                        InterfaceNavigationUtil.openPlayOnlineOptions(true);
+
+                                        // Select 'Invite-only session'
+                                        keyPress("DOWN", 50L);
+                                        sleep(150L);
+                                        keyPress("ENTER", 50L);
+                                        sleep(750L);
+
+                                        // Accept warning
+                                        keyPress("ENTER", 50L);
+
+                                        logger.log(Level.INFO, "Glitch completed");
                                     }).start();
                                 }
 
                                 continue;
                             }
+
+                            if(!connectionOpened)
+                                continue;
 
                             final String[] lines = new String(tcpPacket.getPayload().getRawData()).split("\r\n");
 
@@ -121,13 +185,24 @@ public class ReplayGlitch extends Tool {
                                 String path = requestLine[1];
 
                                 if (!path.endsWith("/gameservices/Telemetry.asmx/SubmitCompressed")) {
-                                    new Thread(() -> {
-                                        if (packetSent.get()) return;
+                                    telemetryPacketCount--;
 
-                                        setNetworkAdapterEnabled(true);
+                                    if(!DEBUG) {
+                                        new Thread(() -> {
+                                            if (packetSent.get()) return;
 
-                                        networkDisabled.set(false);
-                                    }).start();
+                                            synchronized (networkLock) {
+                                                try {
+                                                    networkLock.wait();
+                                                } catch (InterruptedException ignore) {
+                                                }
+                                            }
+
+                                            setNetworkAdapterEnabled(true);
+
+                                            networkDisabled.set(false);
+                                        }).start();
+                                    }
 
                                     continue;
                                 }
@@ -142,56 +217,13 @@ public class ReplayGlitch extends Tool {
 
                             packedReceived.set(true);
 
+                            logger.log(Level.INFO, "Telemetry response received at " + TIME_FORMAT.format(new Date()));
+
                             break;
                         }
                     }
                 } catch (TimeoutException ignore) {
                 }
-            }
-
-            if (this.cancel)
-                return;
-
-            logger.log(Level.INFO, "Telemetry response received at " + TIME_FORMAT.format(new Date()));
-
-            if(!DEBUG) {
-                sleep(16750L);
-                keyPress("ENTER", 50L);
-
-                // Reconnect network
-                sleep(5000L);
-
-                setNetworkAdapterEnabled(true);
-
-                sleep(15000L);
-
-                // Open Social Club
-                keyPress("HOME", 50L);
-                sleep(1250L);
-
-                // Reconnect and close pop-up
-                robot().mouseMove(1210, 334);
-                sleep(150L);
-                mouseClick("LEFT", 100L);
-
-                sleep(4000L);
-
-                // Close pop-up
-                keyPress("ESCAPE", 50L);
-                sleep(3500L);
-
-                InterfaceNavigationUtil.openPlayOnlineOptions(true);
-
-                // Select 'Invite-only session'
-                keyPress("DOWN", 50L);
-                sleep(150L);
-                keyPress("ENTER", 50L);
-                sleep(750L);
-
-                // Accept warning
-                keyPress("ENTER", 50L);
-
-                logger.log(Level.INFO, "Glitch completed");
             }
         } catch (Exception ex) {
             logger.log(Level.SEVERE, "An error occurred while executing tool: " + ex.getMessage());

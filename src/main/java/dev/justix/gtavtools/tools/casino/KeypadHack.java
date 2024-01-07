@@ -24,8 +24,11 @@ public class KeypadHack extends Tool {
     public KeypadHack(Logger logger) {
         super(logger, Category.CASINO, "Keypad Hack");
 
-        this.relativeData.addRect("1920x1200", "repeater_text", 740, 244, 25, 18);
-        this.relativeData.addRect("1920x1200", "grid", 398, 332, 696, 588);
+        relativeData.addRect("1920x1200", "repeater_text", 740, 244, 25, 18);
+        relativeData.addRect("1920x1200", "grid", 398, 332, 696, 588);
+
+        relativeData.addRect("1920x1080", "repeater_text", 762, 220, 25, 18);
+        relativeData.addRect("1920x1080", "grid", 456, 300, 626, 528);
 
         this.cancel = false;
     }
@@ -43,7 +46,7 @@ public class KeypadHack extends Tool {
             long startMillis = System.currentTimeMillis();
 
             while(!this.cancel && System.currentTimeMillis() - startMillis < 3_650) {
-                final BufferedImage grid = transform(screenshot(this.relativeData.getRect("grid")), true);
+                final BufferedImage grid = transform(screenshot(relativeData.getRect("grid")), true);
                 int cellWidth = grid.getWidth() / 6;
                 int cellHeight = grid.getHeight() / 5;
                 int cellDiameter = (cellWidth + cellHeight) / 2;
@@ -79,30 +82,34 @@ public class KeypadHack extends Tool {
                             .orElseThrow(() -> new NullPointerException(String.format("No value found for x=%d", key)))
             ));
 
-            for (int x = 0; x < 6; x++) {
-                final int expectedY = cells.get(x);
+            if(DEBUG)
+                cells.forEach((key, value) -> logger.log(Level.INFO, String.format("%d: %d", key, value)));
+            else {
+                for (int x = 0; x < 6; x++) {
+                    final int expectedY = cells.get(x);
 
-                if(cursorY > expectedY) {
-                    for (int y = cursorY; y > expectedY; y--) {
-                        keyPress("UP", 8);
-                        sleep(10);
+                    if (cursorY > expectedY) {
+                        for (int y = cursorY; y > expectedY; y--) {
+                            keyPress("UP", 8);
+                            sleep(10);
+                        }
+                    } else if (cursorY < expectedY) {
+                        for (int y = cursorY; y < expectedY; y++) {
+                            keyPress("DOWN", 8);
+                            sleep(10);
+                        }
                     }
-                } else if(cursorY < expectedY) {
-                    for (int y = cursorY; y < expectedY; y++) {
-                        keyPress("DOWN", 8);
-                        sleep(10);
-                    }
+
+                    cursorY = expectedY;
+
+                    keyPress("ENTER", 8);
+                    sleep(2_150);
                 }
 
-                cursorY = expectedY;
-
-                keyPress("ENTER", 8);
-                sleep(2_150);
+                sleep(2_250);
             }
 
-            sleep(2_250);
-
-            BufferedImage textCapture = screenshot(this.relativeData.getRect("repeater_text"));
+            BufferedImage textCapture = screenshot(relativeData.getRect("repeater_text"));
             new RescaleOp(0.85f, 8, null).filter(textCapture, textCapture);
 
             repeaterText = transform(textCapture, true);

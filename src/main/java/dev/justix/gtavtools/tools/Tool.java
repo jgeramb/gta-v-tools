@@ -58,13 +58,13 @@ public abstract class Tool extends View {
         this.settings.add(setting);
     }
 
-    protected Boolean booleanValue(String settingName, boolean defaultValue) {
+    protected Boolean booleanValue(String settingName) {
         return this.settings
                 .stream()
                 .filter(setting -> setting.getName().equals(settingName))
                 .findFirst()
                 .map(Setting::booleanValue)
-                .orElse(defaultValue);
+                .orElse(false);
     }
 
 }
