@@ -1,9 +1,9 @@
 # GTA V Tools
 This program provides a menu overlay for GTA V that allows you to quickly access
 some useful tools to make your life easier. This includes:
-- Replay glitch for all heists (including Cayo Perico) and the Agency VIP Contract
-- Automatic fingerprint hack for the Cayo Perico heist
-- Solo lobby creation 
+- Replay glitch for all heists (including Cayo Perico), the Diamond Casino Heist and the Agency VIP Contract
+- Automatic fingerprint hack for the Cayo Perico Heist and Diamond Casino Heist
+- Solo lobby creation
 - ... and many more!
 
 ## Requirements
@@ -16,7 +16,9 @@ some useful tools to make your life easier. This includes:
 - Open the 'run.bat' file as administrator
 - Keybindings:
   - RSHIFT: Open the menu
-  - Escape: Close the menu 
+  - Enter: Open tool settings
+  - Tab: Toggle tool
+  - Escape: Close the menu
   - Ctrl + Pause: Exit the program
 
 ## License
