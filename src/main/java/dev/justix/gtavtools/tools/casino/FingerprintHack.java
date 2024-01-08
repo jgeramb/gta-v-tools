@@ -34,10 +34,10 @@ public class FingerprintHack extends Tool {
 
         relativeData.addRect("1920x1080", "components_text", 546, 220, 26, 18);
         relativeData.addRect("1920x1080", "expected", 960, 157, 410, 516);
-        relativeData.addRect("1920x1080", "expected_resized", 0, 0, 306, 380);
-        relativeData.addPoint("1920x1080", "part_start_coordinates", 481, 278);
-        relativeData.add("1920x1080", "part_size", 107);
-        relativeData.add("1920x1080", "part_step", 146);
+        relativeData.addRect("1920x1080", "expected_resized", 0, 0, 328, 406);
+        relativeData.addPoint("1920x1080", "part_start_coordinates", 480, 277);
+        relativeData.add("1920x1080", "part_size", 106);
+        relativeData.add("1920x1080", "part_step", 144);
 
         this.cancel = false;
     }
@@ -53,7 +53,7 @@ public class FingerprintHack extends Tool {
             new RescaleOp(2f, -32, null).filter(expectedCapture, expectedCapture);
 
             final BufferedImage expectedResized = transform(expectedCapture, relativeData.getRect("expected_resized"), false);
-            final int[][] expectedPixels = getPixels(expectedResized, 50, 120, 50, 120, 50, 120, false);
+            final int[][] expectedPixels = getPixels(expectedResized, 20, 180, 20, 180, 20, 180, false);
             final int blockSize = BlockMatrixConverter.getBlockSize(expectedPixels);
             final BlockMatrix expected = BlockMatrixConverter.convertPixels(expectedPixels, blockSize);
 
@@ -132,7 +132,7 @@ public class FingerprintHack extends Tool {
                 sleep(15);
             }
 
-            sleep(4_350);
+            sleep(4_500);
 
             BufferedImage textCapture = screenshot(relativeData.getRect("components_text"));
             new RescaleOp(0.85f, 8, null).filter(textCapture, textCapture);

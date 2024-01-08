@@ -119,10 +119,10 @@ public class StartMission extends Tool {
             this.waitingForCutDefinition = true;
         } else {
             keyPress("DOWN", 10);
-            sleep(15);
+            sleep(3_500);
 
             keyPress("ENTER", 10);
-            sleep(500);
+            sleep(15);
 
             this.waitingForCutDefinition = false;
         }
