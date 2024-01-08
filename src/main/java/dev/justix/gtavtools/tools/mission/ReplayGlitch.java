@@ -1,7 +1,6 @@
 package dev.justix.gtavtools.tools.mission;
 
 import dev.justix.gtavtools.config.ApplicationConfig;
-import dev.justix.gtavtools.gui.components.settings.BooleanSetting;
 import dev.justix.gtavtools.logging.Level;
 import dev.justix.gtavtools.logging.Logger;
 import dev.justix.gtavtools.tools.Category;
@@ -35,8 +34,6 @@ public class ReplayGlitch extends Tool {
 
     public ReplayGlitch(Logger logger) {
         super(logger, Category.MISSION, "Replay Glitch");
-
-        addSetting(new BooleanSetting(this, "Casino", false));
     }
 
     @Override
@@ -72,7 +69,6 @@ public class ReplayGlitch extends Tool {
             final AtomicBoolean networkDisabled = new AtomicBoolean(false);
             final Object networkLock = new Object();
 
-            int telemetryPacketCount = 0;
             boolean connectionOpened = false;
 
             AtomicBoolean packetSent = new AtomicBoolean(false),
@@ -102,9 +98,6 @@ public class ReplayGlitch extends Tool {
 
                                     // Check if destination address is a telemetry server
                                     if(!telemetryServers.contains(destAddress.getHostAddress()))
-                                        continue;
-
-                                    if((++telemetryPacketCount) < 2 && booleanValue("Casino"))
                                         continue;
 
                                     connectionOpened = true;
@@ -185,8 +178,6 @@ public class ReplayGlitch extends Tool {
                                 String path = requestLine[1];
 
                                 if (!path.endsWith("/gameservices/Telemetry.asmx/SubmitCompressed")) {
-                                    telemetryPacketCount--;
-
                                     if(!DEBUG) {
                                         new Thread(() -> {
                                             if (packetSent.get()) return;

@@ -224,6 +224,10 @@ public class ImageUtil {
             }
         }
 
+        // If less than 7.5% of the pixels are checked, the result is not reliable
+        if(checkImage2WhitePixelsOnly && checked < (image1Width * image1Height) * 0.075)
+            return 0d;
+
         return (double) matches / checked;
     }
 
