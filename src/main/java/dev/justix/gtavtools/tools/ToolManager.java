@@ -58,6 +58,7 @@ public class ToolManager {
         new CallMechanic(logger);
         new CallMerryweather(logger);
         new CallPegasus(logger);
+        new CopsLookAway(logger);
         new RemoveWantedLevel(logger);
         new RepairAllVehicles(logger);
     }
