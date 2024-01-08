@@ -9,8 +9,7 @@ import dev.justix.gtavtools.tools.combat.AutoShoot;
 import dev.justix.gtavtools.tools.lobby.SoloLobby;
 import dev.justix.gtavtools.tools.lobby.SwitchInviteLobby;
 import dev.justix.gtavtools.tools.lobby.SwitchPublicLobby;
-import dev.justix.gtavtools.tools.misc.CallMechanic;
-import dev.justix.gtavtools.tools.misc.RepairAllVehicles;
+import dev.justix.gtavtools.tools.misc.*;
 import dev.justix.gtavtools.tools.mission.ReplayGlitch;
 
 import java.util.HashMap;
@@ -57,6 +56,9 @@ public class ToolManager {
 
         // Miscellaneous
         new CallMechanic(logger);
+        new CallMerryweather(logger);
+        new CallPegasus(logger);
+        new RemoveWantedLevel(logger);
         new RepairAllVehicles(logger);
     }
 

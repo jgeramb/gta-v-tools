@@ -7,7 +7,12 @@ import dev.justix.gtavtools.tools.Tool;
 import dev.justix.gtavtools.util.OCRUtil;
 import dev.justix.gtavtools.util.SystemUtil;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 public class VaultCode extends Tool {
+
+    private static final Pattern CODE_PATTERN = Pattern.compile("[0-9]{2}-[0-9]{2}-[0-9]{2}");
 
     private boolean cancel;
     private int[] vaultCode;
@@ -15,9 +20,9 @@ public class VaultCode extends Tool {
     public VaultCode(Logger logger) {
         super(logger, Category.CAYO_PERICO, "Vault Code");
 
-        relativeData.addRect("1920x1200", "code", 181, 917, 81, 22);
+        relativeData.addRect("1920x1200", "code", 33, 891, 291, 49);
 
-        relativeData.addRect("1920x1080", "code", 168, 822, 73, 20);
+        relativeData.addRect("1920x1080", "code", 34, 801, 261, 43);
 
         this.cancel = false;
         this.vaultCode = null;
@@ -27,13 +32,18 @@ public class VaultCode extends Tool {
     public void execute() {
         if (this.vaultCode == null) {
             String ocr = OCRUtil.ocr(SystemUtil.screenshot(relativeData.getRect("code")), false);
+            Matcher matcher = CODE_PATTERN.matcher(ocr);
 
-            if (ocr.length() > "00-00-00".length())
-                ocr = ocr.substring(0, "00-00-00".length());
+            if(!matcher.find()) {
+                logger.log(Level.INFO, "Could not read code");
+                return;
+            }
 
-            logger.log(Level.INFO, "Scanned code: " + ocr);
+            String code = matcher.group();
 
-            String[] codeParts = ocr.split("-");
+            logger.log(Level.INFO, "Code: " + code);
+
+            String[] codeParts = code.split("-");
 
             try {
                 this.vaultCode = new int[] { Integer.parseInt(codeParts[0]), Integer.parseInt(codeParts[1]), Integer.parseInt(codeParts[2]) };

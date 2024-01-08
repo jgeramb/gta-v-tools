@@ -5,12 +5,12 @@ import dev.justix.gtavtools.tools.Category;
 import dev.justix.gtavtools.tools.Tool;
 import dev.justix.gtavtools.util.InterfaceNavigationUtil;
 
-public class CallMechanic extends Tool {
+public class CallMerryweather extends Tool {
 
-    private static final String NUMBER = "328-555-0153";
+    private static final String NUMBER = "273-555-0120";
 
-    public CallMechanic(Logger logger) {
-        super(logger, Category.MISC, "Call Mechanic");
+    public CallMerryweather(Logger logger) {
+        super(logger, Category.MISC, "Call Merryweather");
     }
 
     @Override
