@@ -190,7 +190,7 @@ public class FingerprintHack extends Tool {
                 }
             }
 
-            sleep(4_350);
+            sleep(3_950);
 
             BufferedImage textCapture = screenshot(relativeData.getRect("components_text"));
             new RescaleOp(2.5f, -8, null).filter(textCapture, textCapture);

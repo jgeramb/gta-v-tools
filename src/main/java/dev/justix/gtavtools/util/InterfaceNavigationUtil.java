@@ -2,6 +2,9 @@ package dev.justix.gtavtools.util;
 
 import dev.justix.gtavtools.tools.RelativeToolData;
 
+import java.awt.*;
+import java.util.Map;
+
 import static dev.justix.gtavtools.util.SystemUtil.*;
 
 public class InterfaceNavigationUtil {
@@ -39,20 +42,6 @@ public class InterfaceNavigationUtil {
 
         keyPress("ENTER", 25L);
         sleep(500L);
-    }
-
-    public static void openPhoneContacts() {
-        SystemUtil.keyPress("UP", 15);
-        SystemUtil.sleep(600);
-
-        SystemUtil.keyPress("UP", 15);
-        SystemUtil.sleep(80);
-
-        SystemUtil.keyPress("RIGHT", 15);
-        SystemUtil.sleep(80);
-
-        SystemUtil.keyPress("ENTER", 15);
-        SystemUtil.sleep(500);
     }
 
     public static void openPlaningScreen() {
@@ -99,6 +88,73 @@ public class InterfaceNavigationUtil {
 
         keyPress("ENTER", 15);
         sleep(14_500L);
+    }
+
+    private static final Map<Byte, Point> NUMBER_POSITIONS = Map.of(
+            (byte) 1, new Point(0, 0),
+            (byte) 2, new Point(1, 0),
+            (byte) 3, new Point(2, 0),
+            (byte) 4, new Point(0, 1),
+            (byte) 5, new Point(1, 1),
+            (byte) 6, new Point(2, 1),
+            (byte) 7, new Point(0, 2),
+            (byte) 8, new Point(1, 2),
+            (byte) 9, new Point(2, 2),
+            (byte) 0, new Point(1, 3)
+    );
+
+    public static void callNumber(String number) {
+        int[] digits = number.chars().map(c -> c - '0').toArray();
+
+        // Open phone contacts
+        keyPress("UP", 10);
+        sleep(625);
+
+        keyPress("UP", 10);
+        sleep(50);
+
+        keyPress("RIGHT", 10);
+        sleep(50);
+
+        keyPress("ENTER", 10);
+        sleep(100);
+
+        // Dial number
+        keyPress("SPACE", 10);
+        sleep(75);
+        
+        int currentX = 0, currentY = 0;
+
+        for (int digit : digits) {
+            Point target = NUMBER_POSITIONS.get((byte) digit);
+
+            if(target == null)
+                continue;
+
+            if(target.x != currentX) {
+                for (int i = 0; i < Math.abs(target.x - currentX); i++) {
+                    keyPress((target.x < currentX) ? "LEFT" : "RIGHT", 10);
+                    sleep(50);
+                }
+
+                currentX = target.x;
+            }
+
+            if(target.y != currentY) {
+                for (int i = 0; i < Math.abs(target.y - currentY); i++) {
+                    keyPress((target.y < currentY) ? "UP" : "DOWN", 10);
+                    sleep(50);
+                }
+
+                currentY = target.y;
+            }
+
+            keyPress("ENTER", 10);
+            sleep(50);
+        }
+
+        keyPress("SPACE", 10);
+        sleep(50);
     }
 
 }

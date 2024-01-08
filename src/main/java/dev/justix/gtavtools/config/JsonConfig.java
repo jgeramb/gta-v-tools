@@ -73,11 +73,15 @@ public class JsonConfig {
     }
 
     private void copyDefaults(JSONObject defaults) {
+        copyDefaults(this.data, defaults);
+    }
+
+    private void copyDefaults(JSONObject current, JSONObject defaults) {
         for(String key : defaults.keySet()) {
-            if(!this.data.has(key))
-                this.data.put(key, defaults.get(key));
+            if(!current.has(key))
+                current.put(key, defaults.get(key));
             else if(defaults.get(key) instanceof JSONObject)
-                copyDefaults(defaults.getJSONObject(key));
+                copyDefaults(current.getJSONObject(key), defaults.getJSONObject(key));
         }
     }
 
