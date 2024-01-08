@@ -132,17 +132,21 @@ public class InterfaceNavigationUtil {
                 continue;
 
             if(target.x != currentX) {
-                for (int i = 0; i < Math.abs(target.x - currentX); i++) {
-                    keyPress((target.x < currentX) ? "LEFT" : "RIGHT", 10);
-                    sleep(50);
-                }
+                boolean skipToRight = target.x == 2 && currentX == 0;
+                boolean skipToLeft = target.x == 0 && currentX == 2;
+
+                keyPress(((target.x < currentX && !skipToLeft) || skipToRight) ? "LEFT" : "RIGHT", 10);
+                sleep(50);
 
                 currentX = target.x;
             }
 
             if(target.y != currentY) {
-                for (int i = 0; i < Math.abs(target.y - currentY); i++) {
-                    keyPress((target.y < currentY) ? "UP" : "DOWN", 10);
+                boolean skipToBottom = target.y == 3 && currentY == 0;
+                boolean skipToTop = target.y == 0 && currentY == 3;
+
+                for (int i = 0; i < ((skipToBottom || skipToTop) ? 1 : Math.abs(target.y - currentY)); i++) {
+                    keyPress(((target.y < currentY && !skipToTop) || skipToBottom) ? "UP" : "DOWN", 10);
                     sleep(50);
                 }
 

@@ -7,7 +7,7 @@ import java.util.concurrent.TimeUnit;
 
 public class SystemUtil {
 
-    public static final boolean DEBUG = Boolean.parseBoolean(System.getProperty("app.debug", "false"));
+    public static boolean DEBUG;
 
     public static final String RESOLUTION;
     private static final long SLEEP_PRECISION, SPIN_YIELD_PRECISION;

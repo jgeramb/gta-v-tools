@@ -16,9 +16,9 @@ public class OCRUtil {
 
         try {
             tesseract.setDatapath(new File(OCRUtil.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParentFile().getPath() + "\\classes\\tessdata");
-            tesseract.setLanguage("deu");
+            tesseract.setLanguage("eng");
         } catch (URISyntaxException ex) {
-            System.err.println("Could not find Tesseract training data");
+            System.err.println("Could not find Tesseract model");
         }
     }
 

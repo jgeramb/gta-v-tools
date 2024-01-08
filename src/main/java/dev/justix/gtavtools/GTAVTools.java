@@ -11,6 +11,7 @@ import dev.justix.gtavtools.tools.ToolManager;
 import dev.justix.gtavtools.util.SystemUtil;
 import lombok.Getter;
 
+import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class GTAVTools {
@@ -24,6 +25,9 @@ public class GTAVTools {
 
     public static void main(String[] args) {
         Thread.currentThread().setName("Application");
+
+        // Set debug mode
+        SystemUtil.DEBUG = Arrays.asList(args).contains("--debug");
 
         // Initialize GUI
         gui = new GUI();
