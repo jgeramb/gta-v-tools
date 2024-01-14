@@ -4,8 +4,9 @@ import dev.justix.gtavtools.logging.Level;
 import dev.justix.gtavtools.logging.Logger;
 import dev.justix.gtavtools.tools.Category;
 import dev.justix.gtavtools.tools.Tool;
-import dev.justix.gtavtools.util.OCRUtil;
 import dev.justix.gtavtools.util.SystemUtil;
+import dev.justix.gtavtools.util.ocr.OCRUtil;
+import dev.justix.gtavtools.util.ocr.Symbols;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -31,7 +32,7 @@ public class VaultCode extends Tool {
     @Override
     public void execute() {
         if (this.vaultCode == null) {
-            String ocr = OCRUtil.ocr(SystemUtil.screenshot(relativeData.getRect("code")), false);
+            String ocr = OCRUtil.ocr(SystemUtil.screenshot(relativeData.getRect("code")), Symbols.NUMBERS, Symbols.SPECIAL);
             Matcher matcher = CODE_PATTERN.matcher(ocr);
 
             if(!matcher.find()) {

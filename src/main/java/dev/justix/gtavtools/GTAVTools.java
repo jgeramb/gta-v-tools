@@ -4,6 +4,7 @@ import com.github.kwhat.jnativehook.GlobalScreen;
 import com.github.kwhat.jnativehook.NativeHookException;
 import com.github.kwhat.jnativehook.keyboard.NativeKeyEvent;
 import com.github.kwhat.jnativehook.keyboard.NativeKeyListener;
+import dev.justix.gtavtools.config.ApplicationConfig;
 import dev.justix.gtavtools.gui.GUI;
 import dev.justix.gtavtools.logging.Level;
 import dev.justix.gtavtools.logging.Logger;
@@ -28,6 +29,9 @@ public class GTAVTools {
 
         // Set debug mode
         SystemUtil.DEBUG = Arrays.asList(args).contains("--debug");
+
+        // Add shutdown hook to configuration
+        ApplicationConfig.addShutdownHook();
 
         // Initialize GUI
         gui = new GUI();

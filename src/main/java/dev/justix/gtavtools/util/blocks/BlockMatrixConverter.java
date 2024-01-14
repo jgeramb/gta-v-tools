@@ -1,6 +1,6 @@
 package dev.justix.gtavtools.util.blocks;
 
-import dev.justix.gtavtools.util.ImageUtil;
+import dev.justix.gtavtools.util.images.ImageUtil;
 import lombok.Getter;
 
 import java.awt.*;

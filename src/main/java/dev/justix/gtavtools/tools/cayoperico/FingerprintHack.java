@@ -4,9 +4,10 @@ import dev.justix.gtavtools.logging.Level;
 import dev.justix.gtavtools.logging.Logger;
 import dev.justix.gtavtools.tools.Category;
 import dev.justix.gtavtools.tools.Tool;
-import dev.justix.gtavtools.util.OCRUtil;
 import dev.justix.gtavtools.util.blocks.BlockMatrix;
 import dev.justix.gtavtools.util.blocks.BlockMatrixConverter;
+import dev.justix.gtavtools.util.ocr.OCRUtil;
+import dev.justix.gtavtools.util.ocr.Symbols;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -14,8 +15,8 @@ import java.awt.image.RescaleOp;
 import java.util.Locale;
 import java.util.concurrent.CountDownLatch;
 
-import static dev.justix.gtavtools.util.ImageUtil.*;
 import static dev.justix.gtavtools.util.SystemUtil.*;
+import static dev.justix.gtavtools.util.images.ImageUtil.*;
 
 public class FingerprintHack extends Tool {
 
@@ -196,7 +197,7 @@ public class FingerprintHack extends Tool {
             new RescaleOp(2.5f, -8, null).filter(textCapture, textCapture);
 
             componentsTextCapture = transform(textCapture, true);
-        } while (OCRUtil.ocr(componentsTextCapture, true).equalsIgnoreCase("CO"));
+        } while (OCRUtil.ocr(componentsTextCapture, Symbols.UPPERCASE_LETTERS).equalsIgnoreCase("CO"));
     }
 
     @Override

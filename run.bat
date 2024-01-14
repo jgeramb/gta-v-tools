@@ -1,4 +1,4 @@
 @echo off
 cls
-cd /d "%~dp0"
-java -jar target\gta-v-tools.jar
+cd /d "%~dp0\run"
+java -jar ..\target\gta-v-tools.jar
