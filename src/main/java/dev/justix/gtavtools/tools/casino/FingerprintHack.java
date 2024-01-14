@@ -26,14 +26,14 @@ public class FingerprintHack extends Tool {
     public FingerprintHack(Logger logger) {
         super(logger, Category.CASINO, "Fingerprint Hack");
 
-        relativeData.addRect("1920x1200", "components_text", 502, 244, 26, 18);
+        relativeData.addRect("1920x1200", "signal_match_text", 887, 567, 204, 24);
         relativeData.addRect("1920x1200", "expected", 986, 174, 361, 560);
         relativeData.addRect("1920x1200", "expected_resized", 0, 0, 290, 430);
         relativeData.addPoint("1920x1200", "part_start_coordinates", 428, 308);
         relativeData.add("1920x1200", "part_size", 118);
         relativeData.add("1920x1200", "part_step", 160);
 
-        relativeData.addRect("1920x1080", "components_text", 546, 220, 26, 18);
+        relativeData.addRect("1920x1080", "signal_match_text", 894, 510, 184, 24);
         relativeData.addRect("1920x1080", "expected", 960, 157, 410, 516);
         relativeData.addRect("1920x1080", "expected_resized", 0, 0, 328, 406);
         relativeData.addPoint("1920x1080", "part_start_coordinates", 480, 277);
@@ -45,12 +45,7 @@ public class FingerprintHack extends Tool {
 
     @Override
     public void execute() {
-        BufferedImage componentsText;
-
-        do {
-            if(this.cancel)
-                return;
-
+        while (!this.cancel) {
             long startMillis = System.currentTimeMillis();
 
             BufferedImage expectedCapture = screenshot(relativeData.getRect("expected"));
@@ -94,9 +89,9 @@ public class FingerprintHack extends Tool {
                             true
                     );
 
-                    indexMatches.add(new double[] { finalIndex, matchPercentage });
+                    indexMatches.add(new double[]{finalIndex, matchPercentage});
 
-                    if(DEBUG)
+                    if (DEBUG)
                         logger.log(Level.INFO, String.format(Locale.US, "Part %d matches %.2f%%", finalIndex, matchPercentage * 100));
 
                     indicesLatch.countDown();
@@ -113,7 +108,7 @@ public class FingerprintHack extends Tool {
 
             logger.log(Level.INFO, "Computation completed in " + (System.currentTimeMillis() - startMillis) + "ms");
 
-            if(!DEBUG) {
+            if (!DEBUG) {
                 final List<Integer> bestMatchingIndices = indexMatches
                         .stream()
                         .sorted(Comparator.comparingDouble(a -> 1 - a[1]))
@@ -132,14 +127,17 @@ public class FingerprintHack extends Tool {
                 }
 
                 keyPress("TAB", 10);
-                sleep(4_650);
+                sleep(2_900);
             }
 
-            BufferedImage textCapture = screenshot(relativeData.getRect("components_text"));
+            BufferedImage textCapture = screenshot(relativeData.getRect("signal_match_text"));
             new RescaleOp(0.85f, 8, null).filter(textCapture, textCapture);
 
-            componentsText = transform(textCapture, true);
-        } while (OCRUtil.ocr(componentsText, Symbols.UPPERCASE_LETTERS).startsWith("C"));
+            if (!OCRUtil.ocr(transform(textCapture, true), Symbols.UPPERCASE_LETTERS).strip().equals("SIGNALMATCH"))
+                break;
+
+            sleep(1_800);
+        }
     }
 
     @Override

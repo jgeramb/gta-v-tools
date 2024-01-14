@@ -29,7 +29,6 @@ public class StartMission extends Tool {
             InterfaceNavigationUtil.openPlaningScreen();
 
             keyPress("ENTER", 15);
-            sleep(15);
 
             this.waitingForOtherPlayers = true;
         } else if (this.waitingForOtherPlayers) {
@@ -67,22 +66,18 @@ public class StartMission extends Tool {
             goToNextOption();
 
             if(theBigCon) {
-                // Leave Outfit
-                keyPress("ENTER", 10);
-                sleep(100);
-
                 /* NOOSE */
                 keyPress("RIGHT", 10);
                 sleep(15);
 
                 keyPress("ENTER", 10);
-                sleep(100);
+                sleep(75);
 
                 keyPress("LEFT", 10);
                 sleep(15);
 
                 keyPress("ENTER", 10);
-                sleep(100);
+                sleep(75);
             }
 
             // Exit point
@@ -106,23 +101,21 @@ public class StartMission extends Tool {
             sleep(15);
 
             keyPress("ENTER", 10);
-            sleep(100);
+            sleep(75);
 
             // Navigate to cut definition
             keyPress("RIGHT", 10);
-            sleep(100);
-
-            keyPress("UP", 10);
             sleep(15);
+
+            keyPress("DOWN", 10);
+            sleep(15);
+
+            keyPress("RIGHT", 10);
 
             this.waitingForOtherPlayers = false;
             this.waitingForCutDefinition = true;
         } else {
-            keyPress("DOWN", 10);
-            sleep(4_500);
-
             keyPress("ENTER", 10);
-            sleep(15);
 
             this.waitingForCutDefinition = false;
         }
@@ -130,13 +123,13 @@ public class StartMission extends Tool {
 
     private void goToNextOption() {
         keyPress("ENTER", 10);
-        sleep(100);
+        sleep(75);
 
         keyPress("DOWN", 10);
         sleep(15);
 
         keyPress("ENTER", 10);
-        sleep(100);
+        sleep(75);
     }
 
 }

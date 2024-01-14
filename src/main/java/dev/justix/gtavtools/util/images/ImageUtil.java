@@ -171,7 +171,7 @@ public class ImageUtil {
                                                 int minXOffset, int maxXOffset,
                                                 int minYOffset, int maxYOffset,
                                                 boolean checkImage2WhitePixelsOnly) {
-        final double requiredCheckedPixels = Stream.of(image1Pixels).flatMapToInt(Arrays::stream).filter(pixel -> pixel == 1).count() * 0.6;
+        final double requiredCheckedPixels = Stream.of(image1Pixels).flatMapToInt(Arrays::stream).filter(pixel -> pixel == 1).count() * 0.45;
         final Set<ComparisonResult> results = new HashSet<>();
         final int resultCount = (maxXOffset - minXOffset + 1) * (maxYOffset - minYOffset + 1);
         final CountDownLatch latch = new CountDownLatch(resultCount);

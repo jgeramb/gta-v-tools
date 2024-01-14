@@ -2,8 +2,8 @@ package dev.justix.gtavtools.tools;
 
 import dev.justix.gtavtools.logging.Level;
 import dev.justix.gtavtools.logging.Logger;
-import dev.justix.gtavtools.tools.casino.Drill;
 import dev.justix.gtavtools.tools.casino.KeypadHack;
+import dev.justix.gtavtools.tools.casino.LaserDrill;
 import dev.justix.gtavtools.tools.cayoperico.*;
 import dev.justix.gtavtools.tools.combat.AutoShoot;
 import dev.justix.gtavtools.tools.lobby.SoloLobby;
@@ -38,7 +38,7 @@ public class ToolManager {
         new VaultCode(logger);
 
         // Diamond Casino Heist
-        new Drill(logger);
+        new LaserDrill(logger);
         new dev.justix.gtavtools.tools.casino.FingerprintHack(logger);
         new KeypadHack(logger);
         new dev.justix.gtavtools.tools.casino.StartMission(logger);
