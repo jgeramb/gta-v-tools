@@ -4,16 +4,17 @@ import dev.justix.gtavtools.logging.Level;
 import dev.justix.gtavtools.logging.Logger;
 import dev.justix.gtavtools.tools.Category;
 import dev.justix.gtavtools.tools.Tool;
-import dev.justix.gtavtools.util.OCRUtil;
+import dev.justix.gtavtools.util.ocr.OCRUtil;
+import dev.justix.gtavtools.util.ocr.Symbols;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.RescaleOp;
 import java.util.HashMap;
 import java.util.Map;
 
-import static dev.justix.gtavtools.util.ImageUtil.isFilled;
-import static dev.justix.gtavtools.util.ImageUtil.transform;
 import static dev.justix.gtavtools.util.SystemUtil.*;
+import static dev.justix.gtavtools.util.images.ImageUtil.isFilled;
+import static dev.justix.gtavtools.util.images.ImageUtil.transform;
 
 public class KeypadHack extends Tool {
 
@@ -113,7 +114,7 @@ public class KeypadHack extends Tool {
             new RescaleOp(0.85f, 8, null).filter(textCapture, textCapture);
 
             repeaterText = transform(textCapture, true);
-        } while (OCRUtil.ocr(repeaterText, true).equals("RE"));
+        } while (OCRUtil.ocr(repeaterText, Symbols.UPPERCASE_LETTERS).equals("RE"));
 
         this.logger.log(Level.INFO, "Keypad hacked successfully");
     }

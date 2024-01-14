@@ -9,8 +9,8 @@ import java.awt.image.BufferedImage;
 import java.awt.image.RescaleOp;
 import java.io.IOException;
 
-import static dev.justix.gtavtools.util.ImageUtil.*;
 import static dev.justix.gtavtools.util.SystemUtil.*;
+import static dev.justix.gtavtools.util.images.ImageUtil.*;
 
 public class SignalBoxHack extends Tool {
 
@@ -147,9 +147,9 @@ public class SignalBoxHack extends Tool {
 
     private int getFactor(BufferedImage source) {
         BufferedImage image = comparableImage(source);
-        double factor1Match = getMaxMatchPercentage(this.factor1, image, 100f, 13, 0),
-                factor2Match = getMaxMatchPercentage(this.factor2, image, 100f, 8, 19),
-                factor10Match = getMaxMatchPercentage(this.factor10, image, 100f, 2, 2);
+        double factor1Match = getBestMatchPercentage(this.factor1, image, 13, 0),
+                factor2Match = getBestMatchPercentage(this.factor2, image, 8, 19),
+                factor10Match = getBestMatchPercentage(this.factor10, image, 2, 2);
 
         if ((factor1Match > factor2Match) && (factor1Match > factor10Match))
             return 1;

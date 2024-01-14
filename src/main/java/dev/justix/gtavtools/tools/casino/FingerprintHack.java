@@ -4,9 +4,10 @@ import dev.justix.gtavtools.logging.Level;
 import dev.justix.gtavtools.logging.Logger;
 import dev.justix.gtavtools.tools.Category;
 import dev.justix.gtavtools.tools.Tool;
-import dev.justix.gtavtools.util.OCRUtil;
 import dev.justix.gtavtools.util.blocks.BlockMatrix;
 import dev.justix.gtavtools.util.blocks.BlockMatrixConverter;
+import dev.justix.gtavtools.util.ocr.OCRUtil;
+import dev.justix.gtavtools.util.ocr.Symbols;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -15,8 +16,8 @@ import java.util.List;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
 
-import static dev.justix.gtavtools.util.ImageUtil.*;
 import static dev.justix.gtavtools.util.SystemUtil.*;
+import static dev.justix.gtavtools.util.images.ImageUtil.*;
 
 public class FingerprintHack extends Tool {
 
@@ -25,14 +26,14 @@ public class FingerprintHack extends Tool {
     public FingerprintHack(Logger logger) {
         super(logger, Category.CASINO, "Fingerprint Hack");
 
-        relativeData.addRect("1920x1200", "components_text", 502, 244, 26, 18);
+        relativeData.addRect("1920x1200", "signal_match_text", 887, 567, 204, 24);
         relativeData.addRect("1920x1200", "expected", 986, 174, 361, 560);
         relativeData.addRect("1920x1200", "expected_resized", 0, 0, 290, 430);
         relativeData.addPoint("1920x1200", "part_start_coordinates", 428, 308);
         relativeData.add("1920x1200", "part_size", 118);
         relativeData.add("1920x1200", "part_step", 160);
 
-        relativeData.addRect("1920x1080", "components_text", 546, 220, 26, 18);
+        relativeData.addRect("1920x1080", "signal_match_text", 894, 510, 184, 24);
         relativeData.addRect("1920x1080", "expected", 960, 157, 410, 516);
         relativeData.addRect("1920x1080", "expected_resized", 0, 0, 328, 406);
         relativeData.addPoint("1920x1080", "part_start_coordinates", 480, 277);
@@ -44,9 +45,7 @@ public class FingerprintHack extends Tool {
 
     @Override
     public void execute() {
-        BufferedImage componentsTextCapture;
-
-        do {
+        while (!this.cancel) {
             long startMillis = System.currentTimeMillis();
 
             BufferedImage expectedCapture = screenshot(relativeData.getRect("expected"));
@@ -55,6 +54,7 @@ public class FingerprintHack extends Tool {
             final BufferedImage expectedResized = transform(expectedCapture, relativeData.getRect("expected_resized"), false);
             final int[][] expectedPixels = getPixels(expectedResized, 20, 180, 20, 180, 20, 180, false);
             final int blockSize = BlockMatrixConverter.getBlockSize(expectedPixels);
+            final Rectangle bounds = BlockMatrixConverter.getLastBounds();
             final BlockMatrix expected = BlockMatrixConverter.convertPixels(expectedPixels, blockSize);
 
             debug("expected", expected.getPixels());
@@ -62,13 +62,13 @@ public class FingerprintHack extends Tool {
             final Point start = relativeData.getPoint("part_start_coordinates");
             final int size = relativeData.getNumber("part_size"),
                     step = relativeData.getNumber("part_step"),
-                    comparisonPadding = 4;
+                    comparisonPadding = 2;
 
             final BufferedImage partsCapture = screenshot(start.x, start.y, step + size, step * 3 + size);
             new RescaleOp(16f, -72, null).filter(partsCapture, partsCapture);
 
             final BufferedImage partsImage = transform(partsCapture, true);
-            final Map<Integer, Double> indexMatches = new HashMap<>();
+            final Set<double[]> indexMatches = new HashSet<>();
             final CountDownLatch indicesLatch = new CountDownLatch(8);
 
             for (int index = 0; index < 8; index++) {
@@ -82,17 +82,16 @@ public class FingerprintHack extends Tool {
 
                     final double matchPercentage = part.compare(
                             expected,
-                            87.5f,
-                            -comparisonPadding,
-                            expected.getWidth() - size / blockSize + comparisonPadding,
-                            -comparisonPadding,
-                            expected.getHeight() - size / blockSize + comparisonPadding,
+                            -comparisonPadding + bounds.x / blockSize,
+                            (bounds.width - size) / blockSize + comparisonPadding + bounds.x / blockSize,
+                            -comparisonPadding + bounds.y / blockSize,
+                            (bounds.height - size) / blockSize + comparisonPadding + bounds.y / blockSize,
                             true
                     );
 
-                    indexMatches.put(finalIndex, matchPercentage);
+                    indexMatches.add(new double[]{finalIndex, matchPercentage});
 
-                    if(DEBUG)
+                    if (DEBUG)
                         logger.log(Level.INFO, String.format(Locale.US, "Part %d matches %.2f%%", finalIndex, matchPercentage * 100));
 
                     indicesLatch.countDown();
@@ -109,13 +108,12 @@ public class FingerprintHack extends Tool {
 
             logger.log(Level.INFO, "Computation completed in " + (System.currentTimeMillis() - startMillis) + "ms");
 
-            if(!DEBUG) {
+            if (!DEBUG) {
                 final List<Integer> bestMatchingIndices = indexMatches
-                        .entrySet()
                         .stream()
-                        .sorted(Comparator.comparingInt(entry -> (int) ((1 - entry.getValue()) * 100)))
+                        .sorted(Comparator.comparingDouble(a -> 1 - a[1]))
                         .limit(4)
-                        .map(Map.Entry::getKey)
+                        .map(a -> (int) a[0])
                         .toList();
 
                 for (int index = 0; index < 8; index++) {
@@ -129,16 +127,17 @@ public class FingerprintHack extends Tool {
                 }
 
                 keyPress("TAB", 10);
-                sleep(15);
+                sleep(2_900);
             }
 
-            sleep(4_500);
-
-            BufferedImage textCapture = screenshot(relativeData.getRect("components_text"));
+            BufferedImage textCapture = screenshot(relativeData.getRect("signal_match_text"));
             new RescaleOp(0.85f, 8, null).filter(textCapture, textCapture);
 
-            componentsTextCapture = transform(textCapture, true);
-        } while (OCRUtil.ocr(componentsTextCapture, true).equals("CO"));
+            if (!OCRUtil.ocr(transform(textCapture, true), Symbols.UPPERCASE_LETTERS).strip().equals("SIGNALMATCH"))
+                break;
+
+            sleep(1_800);
+        }
     }
 
     @Override

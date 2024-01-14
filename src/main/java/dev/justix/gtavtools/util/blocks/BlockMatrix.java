@@ -1,6 +1,6 @@
 package dev.justix.gtavtools.util.blocks;
 
-import dev.justix.gtavtools.util.ImageUtil;
+import dev.justix.gtavtools.util.images.ImageUtil;
 import lombok.Data;
 
 import java.util.List;
@@ -20,13 +20,12 @@ public class BlockMatrix {
     }
 
     public double compare(BlockMatrix other) {
-        return ImageUtil.getMaxMatchPercentage(this.pixels, other.getPixels(), 100f, 1, 1);
+        return ImageUtil.getBestMatchPercentage(this.pixels, other.getPixels(), 1, 1);
     }
 
-    public double compare(BlockMatrix other, float maxRequiredMaxPercentage, int minXOffset, int maxXOffset, int minYOffset, int maxYOffset, boolean checkImage2WhitePixelsOnly) {
-        return ImageUtil.getMaxMatchPercentage(
+    public double compare(BlockMatrix other, int minXOffset, int maxXOffset, int minYOffset, int maxYOffset, boolean checkImage2WhitePixelsOnly) {
+        return ImageUtil.getBestMatchPercentage(
                 this.pixels, other.getPixels(),
-                maxRequiredMaxPercentage,
                 minXOffset, maxXOffset,
                 minYOffset, maxYOffset,
                 checkImage2WhitePixelsOnly

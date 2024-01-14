@@ -1,8 +1,11 @@
 package dev.justix.gtavtools.util;
 
 import dev.justix.gtavtools.tools.RelativeToolData;
+import dev.justix.gtavtools.util.ocr.OCRUtil;
+import dev.justix.gtavtools.util.ocr.Symbols;
 
 import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.util.Map;
 
 import static dev.justix.gtavtools.util.SystemUtil.*;
@@ -49,7 +52,9 @@ public class InterfaceNavigationUtil {
         keyPress("M", 25);
         sleep(250);
 
-        if (OCRUtil.ocr(screenshot(RELATIVE_DATA.getRect("interaction_menu_ceo")), true).equals("SecuroServ-CEO")) {
+        final BufferedImage ceoOptionsImage = screenshot(RELATIVE_DATA.getRect("interaction_menu_ceo"));
+
+        if (OCRUtil.ocr(ceoOptionsImage, Symbols.UPPERCASE_LETTERS, Symbols.LOWERCASE_LETTERS, Symbols.SPECIAL).equals("SecuroServ-CEO")) {
             keyPress("ESCAPE", 15);
             sleep(20);
         } else {
@@ -87,7 +92,7 @@ public class InterfaceNavigationUtil {
         sleep(750);
 
         keyPress("ENTER", 15);
-        sleep(14_500L);
+        sleep(15_500L);
     }
 
     private static final Map<Byte, Point> NUMBER_POSITIONS = Map.of(
@@ -108,7 +113,7 @@ public class InterfaceNavigationUtil {
 
         // Open phone contacts
         keyPress("UP", 10);
-        sleep(625);
+        sleep(650);
 
         keyPress("UP", 10);
         sleep(50);
@@ -117,11 +122,11 @@ public class InterfaceNavigationUtil {
         sleep(50);
 
         keyPress("ENTER", 10);
-        sleep(100);
+        sleep(150);
 
         // Dial number
         keyPress("SPACE", 10);
-        sleep(75);
+        sleep(100);
         
         int currentX = 0, currentY = 0;
 

@@ -29,7 +29,6 @@ public class StartMission extends Tool {
             InterfaceNavigationUtil.openPlaningScreen();
 
             keyPress("ENTER", 15);
-            sleep(15);
 
             this.waitingForOtherPlayers = true;
         } else if (this.waitingForOtherPlayers) {
@@ -57,7 +56,7 @@ public class StartMission extends Tool {
                     }
                 }
             } else {
-                // Entry Outfit
+                // Entry outfit
 
                 /* Gruppe Sechs */
                 keyPress("RIGHT", 10);
@@ -67,9 +66,7 @@ public class StartMission extends Tool {
             goToNextOption();
 
             if(theBigCon) {
-                // Leave Outfit
-                keyPress("ENTER", 10);
-                sleep(75);
+                // Leave outfit
 
                 /* NOOSE */
                 keyPress("RIGHT", 10);
@@ -101,28 +98,26 @@ public class StartMission extends Tool {
 
             goToNextOption();
 
-            /* Buyer: Far */
+            /* Buyer: far */
             keyPress("LEFT", 10);
             sleep(15);
 
             keyPress("ENTER", 10);
             sleep(75);
 
-            // Navigate to cut definition
+            // Navigate to 'Start mission' button
             keyPress("RIGHT", 10);
-            sleep(75);
-
-            keyPress("UP", 10);
             sleep(15);
+
+            keyPress("DOWN", 10);
+            sleep(15);
+
+            keyPress("RIGHT", 10);
 
             this.waitingForOtherPlayers = false;
             this.waitingForCutDefinition = true;
         } else {
-            keyPress("DOWN", 10);
-            sleep(3_500);
-
             keyPress("ENTER", 10);
-            sleep(15);
 
             this.waitingForCutDefinition = false;
         }

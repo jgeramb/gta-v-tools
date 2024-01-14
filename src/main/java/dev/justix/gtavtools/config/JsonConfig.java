@@ -93,8 +93,4 @@ public class JsonConfig {
         return this.data.getString(key);
     }
 
-    public JSONObject getJsonObject(String key) {
-        return this.data.getJSONObject(key);
-    }
-
 }

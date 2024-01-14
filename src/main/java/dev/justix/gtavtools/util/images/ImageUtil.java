@@ -1,8 +1,9 @@
-package dev.justix.gtavtools.util;
+package dev.justix.gtavtools.util.images;
 
 import dev.justix.gtavtools.config.ApplicationConfig;
 import dev.justix.gtavtools.logging.Level;
 import dev.justix.gtavtools.logging.Logger;
+import dev.justix.gtavtools.util.SystemUtil;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -11,11 +12,12 @@ import java.awt.image.Raster;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 
 public class ImageUtil {
@@ -36,6 +38,8 @@ public class ImageUtil {
     }
 
     public static void debug(String name, BufferedImage image) {
+        if (!SystemUtil.DEBUG) return;
+
         try {
             ImageIO.write(
                     image,
@@ -73,6 +77,19 @@ public class ImageUtil {
         resizedImageGraphics.dispose();
 
         return resizedImage;
+    }
+
+    public static BufferedImage fromPixels(int[][] pixels) {
+        BufferedImage image = new BufferedImage(pixels[0].length, pixels.length, BufferedImage.TYPE_BYTE_BINARY);
+        image.getRaster().setPixels(
+                0,
+                0,
+                pixels[0].length,
+                pixels.length,
+                Stream.of(pixels).flatMapToInt(Arrays::stream).toArray()
+        );
+
+        return image;
     }
 
     public static BufferedImage crop(BufferedImage image, Rectangle rectangle) {
@@ -131,39 +148,33 @@ public class ImageUtil {
         return pixels;
     }
 
-    public static double getMaxMatchPercentage(BufferedImage image1, BufferedImage image2,
-                                               float maxRequiredPercentage,
-                                               int maxXOffset, int maxYOffset) {
-        return getMaxMatchPercentage(
+    public static double getBestMatchPercentage(BufferedImage image1, BufferedImage image2,
+                                                int maxXOffset, int maxYOffset) {
+        return getBestMatchPercentage(
                 getPixels(image1), getPixels(image2),
-                maxRequiredPercentage,
                 maxXOffset,
                 maxYOffset
         );
     }
 
-    public static double getMaxMatchPercentage(int[][] image1Pixels, int[][] image2Pixels,
-                                               float maxRequiredPercentage,
-                                               int maxXOffset, int maxYOffset) {
-        return getMaxMatchPercentage(
+    public static double getBestMatchPercentage(int[][] image1Pixels, int[][] image2Pixels,
+                                                int maxXOffset, int maxYOffset) {
+        return getBestMatchPercentage(
                 image1Pixels, image2Pixels,
-                maxRequiredPercentage,
                 -maxXOffset, maxXOffset,
                 -maxYOffset, maxYOffset,
                 false
         );
     }
 
-    public static double getMaxMatchPercentage(int[][] image1Pixels, int[][] image2Pixels,
-                                               float maxRequiredPercentage,
-                                               int minXOffset, int maxXOffset,
-                                               int minYOffset, int maxYOffset,
-                                               boolean checkImage2WhitePixelsOnly) {
-        final AtomicReference<Double> matchPercentage = new AtomicReference<>(0.0);
-        final CountDownLatch latch = new CountDownLatch(
-                (Math.abs(maxXOffset - minXOffset) + 1)
-                        * (Math.abs(maxYOffset - minYOffset) + 1)
-        );
+    public static double getBestMatchPercentage(int[][] image1Pixels, int[][] image2Pixels,
+                                                int minXOffset, int maxXOffset,
+                                                int minYOffset, int maxYOffset,
+                                                boolean checkImage2WhitePixelsOnly) {
+        final double requiredCheckedPixels = Stream.of(image1Pixels).flatMapToInt(Arrays::stream).filter(pixel -> pixel == 1).count() * 0.45;
+        final Set<ComparisonResult> results = new HashSet<>();
+        final int resultCount = (maxXOffset - minXOffset + 1) * (maxYOffset - minYOffset + 1);
+        final CountDownLatch latch = new CountDownLatch(resultCount);
 
         try (ExecutorService executor = Executors.newFixedThreadPool(16)) {
             int xOffset = minXOffset, yOffset = minYOffset;
@@ -173,13 +184,10 @@ public class ImageUtil {
 
                 executor.submit(() -> {
                     try {
-                        if (matchPercentage.get() >= (maxRequiredPercentage / 100.0))
-                            return;
+                        final ComparisonResult result = compare(image1Pixels, image2Pixels, finalXOffset, finalYOffset, checkImage2WhitePixelsOnly);
 
-                        double currentMatchPercentage = compare(image1Pixels, image2Pixels, finalXOffset, finalYOffset, checkImage2WhitePixelsOnly);
-
-                        if (currentMatchPercentage > matchPercentage.get())
-                            matchPercentage.set(currentMatchPercentage);
+                        if (result.checked() > requiredCheckedPixels && result.matches() > 0)
+                            results.add(result);
                     } finally {
                         latch.countDown();
                     }
@@ -197,16 +205,20 @@ public class ImageUtil {
         } catch (InterruptedException ignore) {
         }
 
-        return matchPercentage.get();
+        return results
+                .stream()
+                .mapToDouble(ComparisonResult::getPercentage)
+                .max()
+                .orElse(0d);
     }
 
-    public static double compare(int[][] image1Colors, int[][] image2Colors, int xOffset, int yOffset, boolean checkImage2WhitePixelsOnly) {
+    public static ComparisonResult compare(int[][] image1Colors, int[][] image2Colors, int xOffset, int yOffset, boolean checkImage2WhitePixelsOnly) {
         final int image1Height = image1Colors.length, image1Width = image1Colors[0].length;
         final int image2Height = image2Colors.length, image2Width = image2Colors[0].length;
         int checked = 0, matches = 0;
 
         if (image2Width - Math.abs(xOffset) <= 0 || image2Height - Math.abs(yOffset) <= 0)
-            return 0d;
+            return new ComparisonResult(0, 0);
 
         for (int y = Math.max(-yOffset, 0); y < Math.min(image1Height, image2Height - yOffset); y++) {
             final int[] yColors1 = image1Colors[y], yColors2 = image2Colors[y + yOffset];
@@ -224,11 +236,7 @@ public class ImageUtil {
             }
         }
 
-        // If less than 7.5% of the pixels are checked, the result is not reliable
-        if(checkImage2WhitePixelsOnly && checked < (image1Width * image1Height) * 0.075)
-            return 0d;
-
-        return (double) matches / checked;
+        return new ComparisonResult(checked, matches);
     }
 
     public static boolean isFilled(BufferedImage image, int x, int y, int radius) {
