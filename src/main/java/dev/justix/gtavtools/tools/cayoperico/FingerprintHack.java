@@ -139,9 +139,9 @@ public class FingerprintHack extends Tool {
 
                     if (DEBUG) {
                         if (finalCurrentElement == matchingIndex)
-                            System.out.printf(Locale.US, "Part %d is correct\n", finalCurrentElement);
+                            logger.log(Level.INFO, String.format(Locale.US, "Part %d is correct\n", finalCurrentElement));
                         else
-                            System.out.printf(Locale.US, "Part %d is %d%% similar to part %d\n", finalCurrentElement, Math.round(highestMatchPercentage * 100), matchingIndex);
+                            logger.log(Level.INFO, String.format(Locale.US, "Part %d is %d%% similar to part %d\n", finalCurrentElement, Math.round(highestMatchPercentage * 100), matchingIndex));
                     }
 
                     indices[finalCurrentElement] = Math.max(matchingIndex, 0);

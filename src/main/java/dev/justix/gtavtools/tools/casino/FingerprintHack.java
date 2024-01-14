@@ -139,8 +139,6 @@ public class FingerprintHack extends Tool {
             new RescaleOp(0.85f, 8, null).filter(textCapture, textCapture);
 
             componentsText = transform(textCapture, true);
-
-            System.out.println(OCRUtil.ocr(componentsText, Symbols.UPPERCASE_LETTERS));
         } while (OCRUtil.ocr(componentsText, Symbols.UPPERCASE_LETTERS).startsWith("C"));
     }
 
