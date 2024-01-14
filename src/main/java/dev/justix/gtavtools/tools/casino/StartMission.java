@@ -56,7 +56,7 @@ public class StartMission extends Tool {
                     }
                 }
             } else {
-                // Entry Outfit
+                // Entry outfit
 
                 /* Gruppe Sechs */
                 keyPress("RIGHT", 10);
@@ -66,6 +66,8 @@ public class StartMission extends Tool {
             goToNextOption();
 
             if(theBigCon) {
+                // Leave outfit
+
                 /* NOOSE */
                 keyPress("RIGHT", 10);
                 sleep(15);
@@ -96,14 +98,14 @@ public class StartMission extends Tool {
 
             goToNextOption();
 
-            /* Buyer: Far */
+            /* Buyer: far */
             keyPress("LEFT", 10);
             sleep(15);
 
             keyPress("ENTER", 10);
             sleep(75);
 
-            // Navigate to cut definition
+            // Navigate to 'Start mission' button
             keyPress("RIGHT", 10);
             sleep(15);
 

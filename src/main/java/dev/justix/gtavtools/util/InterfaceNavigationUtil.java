@@ -54,7 +54,7 @@ public class InterfaceNavigationUtil {
 
         final BufferedImage ceoOptionsImage = screenshot(RELATIVE_DATA.getRect("interaction_menu_ceo"));
 
-        if (OCRUtil.ocr(ceoOptionsImage, Symbols.UPPERCASE_LETTERS, Symbols.LOWERCASE_LETTERS).equals("SecuroServ-CEO")) {
+        if (OCRUtil.ocr(ceoOptionsImage, Symbols.UPPERCASE_LETTERS, Symbols.LOWERCASE_LETTERS, Symbols.SPECIAL).equals("SecuroServ-CEO")) {
             keyPress("ESCAPE", 15);
             sleep(20);
         } else {
